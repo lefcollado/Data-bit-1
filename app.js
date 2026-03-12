@@ -81,10 +81,10 @@ async function loadData() {
     firestationsRes,
     plrStatsRes
   ] = await Promise.all([
-    fetch("data/bezirksregionen.geojson"),
-    fetch("data/planungsraeume.geojson"),
-    fetch("data/feuerwehr_standorte.geojson"),
-    fetch("data/plr_stats_2025.geojson")
+    fetch("Data/bezirksregionen.geojson"),
+    fetch("Data/planungsraeume.geojson"),
+    fetch("Data/feuerwehr_standorte.geojson"),
+    fetch("Data/plr_stats_2025.geojson")
   ]);
 
   allBezirksregionen = await bezirksregionenRes.json();
