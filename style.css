@@ -194,18 +194,6 @@ body {
   margin: 0 auto;
 }
 
-.statLabel {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.statValue {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
 .statNote {
   font-size: 14px;
   color: #444;
@@ -221,13 +209,6 @@ body {
   padding: 20px 0;
 }
 
-.statSentence {
-  font-size: 18px;
-  line-height: 1.6;
-  color: #444;
-  max-width: 32ch;
-  margin-top: 16px;
-}
 
 /* smaller note text shown below the main sentence and above the arrow */
 .statNote {
