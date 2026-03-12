@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Berlin Fire Map</title>
+  <title>Follow the sirens</title>
 
   <link
     rel="stylesheet"
@@ -16,37 +16,67 @@
 </head>
 <body>
 
-  <!-- WELCOME PAGE -->
-  <div id="welcomeScreen">
+  <section id="welcomeScreen">
     <div class="welcomeContent">
-      <h1>Berlin Fire Response Explorer</h1>
-
+      <h1>Follow the Sirens</h1>
+      <h2>Keeping track of the Berliner Feuerwehr activity near you</h2>
+      <h3>By Letícia Figueiredo Collado and Xiaohan Wu</h3>
       <p>
-        This interactive map lets you explore fire brigade activity in Berlin.
-        Start by selecting the Bezirksregion where you live, then zoom into your
-        Planungsraum to see local response coverage.
+        Emergency vehicles in Germany are known for their brain-breaking sirens. Their loud and piercing sounds decidely make room for the necessary service to get through - it is impossible not to notice them.
       </p>
-
+      <p>
+        Did you ever wonder where the fire trucks are going? Where in Berlin are all these fires? Are they really all fires?
+      </p>
+      <p>
+        Follow us in this interactive path to understand some of the fire brigade activity in Berlin near your home, work, school or any other place of interest.
+      </p>
       <button id="startButton">↓ Start</button>
     </div>
-  </div>
+  </section>
 
-  <!-- MAP PAGE -->
-  <div id="mapScreen">
-
+  <section id="mapScreen">
     <div class="page">
       <h1>Find your area</h1>
-
       <p id="status">Step 1: Click your Bezirksregion.</p>
-
       <button id="resetBtn" hidden>Back to all Bezirksregionen</button>
-
       <div id="map"></div>
     </div>
+  </section>
 
-  </div>
+  <section id="resultScreen">
+    <div class="page">
+      <h1>Your local area</h1>
+      <p id="resultStatus">
+        Step 3: Selected Planungsraum and nearby context.
+      </p>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <div id="resultLayout">
+        <div id="resultMapWrapper">
+          <div id="resultMap"></div>
+        </div>
+
+        <aside id="infoPanel">
+          <h2 id="infoTitle">Planungsraum statistics</h2>
+          <div id="infoContent">
+            <p>Select a Planungsraum to see the statistics.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
+
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
   <script src="app.js"></script>
 
 </body>
