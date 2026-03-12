@@ -119,9 +119,9 @@ function drawBezirksregionen() {
 
   bezirksregionenLayer = L.geoJSON(allBezirksregionen, {
     style: {
-      color: "#00283A",
+      color: "#000000ff",
       weight: 2,
-      fillColor: "#004B6D",
+      fillColor: "#000000ff",
       fillOpacity: 0.10
     },
     onEachFeature: (feature, layer) => {
@@ -169,9 +169,9 @@ function showPlanungsraeumeForBzr(clickedBzrFeature) {
   // show selected BZR only
   bezirksregionenLayer = L.geoJSON(clickedBzrFeature, {
     style: {
-      color: "#00283A",
-      weight: 3,
-      fillColor: "#004B6D",
+      color: "#000000ff",
+      weight: 0,
+      fillColor: "#000000ff",
       fillOpacity: 0
     }
   }).addTo(mainMap);
@@ -257,23 +257,12 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
     String(feature.properties?.[BZR_ID_FIELD])
   );
 
-  // Filter fire stations to those in the selected + neighboring Bezirksregionen
-  const filteredFirestations = {
-    type: "FeatureCollection",
-    features: allFirestations.features.filter((feature) =>
-      neighboringBzrIds.includes(String(feature.properties?.[FIRESTATION_BZR_ID_FIELD]))
-    )
-  };
-
   // Clear old result layers
   if (resultBzrLayer) {
     resultMap.removeLayer(resultBzrLayer);
   }
   if (resultSelectedPlanungsraumLayer) {
     resultMap.removeLayer(resultSelectedPlanungsraumLayer);
-  }
-  if (resultFirestationsLayer) {
-    resultMap.removeLayer(resultFirestationsLayer);
   }
 
   // Draw neighboring Bezirksregionen
@@ -283,9 +272,9 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
         String(feature.properties?.[BZR_ID_FIELD]) === selectedBzrId;
 
       return {
-        color: isSelected ? "#00283A" : "#004B6D",
+        color: isSelected ? "#000000ff" : "#000000ff",
         weight: isSelected ? 3 : 1,
-        fillColor: isSelected ? "#004B6D" : "#e5e7e9",
+        fillColor: isSelected ? "#000000ff" : "#e5e7e9",
         fillOpacity: isSelected ? 0.25 : 0
       };
     },
@@ -310,23 +299,7 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
     }
   }).addTo(resultMap);
 
-  // Draw fire stations
-  resultFirestationsLayer = L.geoJSON(filteredFirestations, {
-    pointToLayer: (feature, latlng) => {
-      return L.circleMarker(latlng, {
-        radius: 6,
-        color: "#7d3c98",
-        weight: 2,
-        fillColor: "#af7ac5",
-        fillOpacity: 0.9
-      });
-    },
-    onEachFeature: (feature, layer) => {
-      const name = feature.properties?.[FIRESTATION_NAME_FIELD] || "Fire station";
-      layer.bindPopup(`<strong>${name}</strong>`);
-    }
-  }).addTo(resultMap);
-
+  
   resultMap.fitBounds(resultBzrLayer.getBounds(), { padding: [30, 30] });
 
   resultStatusEl.textContent =
@@ -338,6 +311,66 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
     resultMap.invalidateSize();
     resultMap.fitBounds(resultBzrLayer.getBounds(), { padding: [30, 30] });
   }, 500);
+}
+
+// ---------- FIRE STATIONS ON RESULT MAP ----------
+// Adds fire station locations to the result map after the last stat is reached
+function showFireStationsOnResultMap(selectedBzrFeature) {
+  const selectedBzrId = String(selectedBzrFeature.properties?.[BZR_ID_FIELD]);
+
+  // find the selected Bezirksregion and all touching neighboring Bezirksregionen
+  const neighboringBzrFeatures = allBezirksregionen.features.filter((feature) => {
+    const featureBzrId = String(feature.properties?.[BZR_ID_FIELD]);
+
+    if (featureBzrId === selectedBzrId) {
+      return true;
+    }
+
+    try {
+      return turf.booleanIntersects(selectedBzrFeature, feature);
+    } catch (error) {
+      console.error("Neighbor test failed for feature:", feature.properties, error);
+      return false;
+    }
+  });
+
+  // collect their IDs so we can filter fire stations
+  const neighboringBzrIds = neighboringBzrFeatures.map((feature) =>
+    String(feature.properties?.[BZR_ID_FIELD])
+  );
+
+  // keep only the fire stations inside the selected + neighboring Bezirksregionen
+  const filteredFirestations = {
+    type: "FeatureCollection",
+    features: allFirestations.features.filter((feature) =>
+      neighboringBzrIds.includes(String(feature.properties?.[FIRESTATION_BZR_ID_FIELD]))
+    )
+  };
+
+  // clear any previous fire station layer before drawing a new one
+  if (resultFirestationsLayer) {
+    resultMap.removeLayer(resultFirestationsLayer);
+  }
+
+  // draw fire stations as circle markers
+  resultFirestationsLayer = L.geoJSON(filteredFirestations, {
+    pointToLayer: (feature, latlng) => {
+      return L.circleMarker(latlng, {
+        radius: 6,
+        color: "#000000ff",
+        weight: 2,
+        fillColor: "#000000ff",
+        fillOpacity: 0.9
+      });
+    },
+    onEachFeature: (feature, layer) => {
+      const name = feature.properties?.[FIRESTATION_NAME_FIELD] || "Fire station";
+      layer.bindPopup(`<strong>${name}</strong>`);
+    }
+  }).addTo(resultMap);
+
+  // return the number of visible stations so we can use it in the final stat block
+  return filteredFirestations.features.length;
 }
 
 // ---------- STATS LOOKUP ----------
@@ -366,27 +399,161 @@ function updateInfoPanel(planungsraumFeature) {
 
   infoTitleEl.textContent = plrName;
 
-  infoContentEl.innerHTML = `
-    <div class="statBlock">
-      <div class="statLabel">Total number of missions</div>
-      <div class="statValue">${formatInteger(stats[STAT_TOTAL_MISSIONS])}</div>
-    </div>
+  // show the statistics as separate narrative blocks
+infoContentEl.innerHTML = `
+  <section class="statSection" id="stat-total">
+    <p class="statLead">
+      In 2025, a total of
+    </p>
 
-    <div class="statBlock">
-      <div class="statLabel">Percentage of critical EMS missions</div>
-      <div class="statValue">${formatPercent(stats[STAT_CEMS_PERCENT])}</div>
-    </div>
+    <div class="statBigNumber">${formatInteger(stats[STAT_TOTAL_MISSIONS])}</div>
 
-    <div class="statBlock">
-      <div class="statLabel">Percentage of fire missions</div>
-      <div class="statValue">${formatPercent(stats[STAT_FIRE_PERCENT])}</div>
-    </div>
+    <p class="statTrail">
+      missions of services provided by the Berliner Feuerwehr were recorded in ${plrName}.
+    </p>
 
-    <div class="statBlock">
-      <div class="statLabel">Critical EMS missions per 1000 people</div>
-      <div class="statValue">${formatDecimal(stats[STAT_CEMS_1000P])}</div>
-    </div>
-  `;
+    <p class="statNote">The city had a total of 533.072 missions.</p>
+    
+    <button class="nextStatBtn" data-target="stat-cems">↓</button>
+    
+  </section>
+
+  <section class="statSection" id="stat-cems">
+    <div class="statBigNumber">${formatPercent(stats[STAT_CEMS_PERCENT])}</div>
+
+    <p class="statTrail">
+      of all missions were classified as 
+        <span class="tooltipTerm">
+          critical EMS
+          <span class="tooltipBox">
+            EMS stands for Emergency Medical Service. It contains all mission where a person is in need of medical assistance. Critical EMS missions are EMS missions of highest priority.
+            <br><br>
+          </span>
+        </span>
+      missions.
+    </p>
+
+    <p class="statNote">In Berlin, 59,5% of all missions were critical EMS missions in 2025.</p>
+
+    <button class="nextStatBtn" data-target="stat-fire">↓</button>
+  </section>
+
+  <section class="statSection" id="stat-fire">
+    <p class="statLead">
+      In this area,
+    </p>
+
+    <div class="statBigNumber">${formatPercent(stats[STAT_FIRE_PERCENT])}</div>
+
+    <p class="statTrail">
+      of all recorded missions were fire-related incidents.
+    </p>
+
+    <p class="statNote">Only 3,8% of all Berliner Feuerwehr missions in the city had fire at least as a suspected factor. This ranges from smoke detectors going off to structure fires.</p>
+
+    <button class="nextStatBtn" data-target="stat-cems1000">↓</button>
+  </section>
+
+  <section class="statSection" id="stat-cems1000">
+    <p class="statLead">
+      In 2025, there were
+    </p>
+
+    <div class="statBigNumber">${formatDecimal(stats[STAT_CEMS_1000P])}</div>
+
+    <p class="statTrail">
+      critical EMS missions per 1000 people in ${plrName}.
+    </p>
+
+    <p class="statNote">The city had a total of 136,2 missions per 1000 people.</p>
+
+    <button class="nextStatBtn revealStationsBtn">↓</button>
+  </section>
+
+  <section class="statSection" id="stat-stations">
+    <p class="statLead" id="stationCountLead">
+      In and around the Bezirksregion of ${selectedBzrFeature.properties[BZR_NAME_FIELD]}, there are
+    </p>
+
+    <div class="statBigNumber" id="stationCountValue">–</div>
+
+    <p class="statTrail" id="stationCountSentence">
+      working fire stations.
+    </p>
+
+    <p class="statNote">As of 2025, there are 102 fire stations distributed through the city of Berlin.</p>
+
+  </section>
+`;
+
+// activate the final reveal button after the panel HTML has been inserted
+setupStationReveal();
+// activate arrow navigation after panel content is created
+setupStatNavigation();
+
+}
+
+// ---------- FINAL REVEAL STEP ----------
+// When the user clicks the last arrow, add fire stations to the map and fill the final block
+function setupStationReveal() {
+  const revealButton = document.querySelector(".revealStationsBtn");
+
+  if (!revealButton) {
+    return;
+  }
+
+  revealButton.addEventListener("click", () => {
+    // add fire stations to the left map and get how many are shown
+    const stationCount = showFireStationsOnResultMap(selectedBzrFeature);
+
+    // fill the final stat block with the number of visible stations
+    const stationCountValueEl = document.getElementById("stationCountValue");
+    const stationCountSentenceEl = document.getElementById("stationCountSentence");
+    const stationSectionEl = document.getElementById("stat-stations");
+
+    if (stationCountValueEl) {
+      stationCountValueEl.textContent = formatInteger(stationCount);
+    }
+
+    if (stationCountSentenceEl) {
+      stationCountSentenceEl.textContent =
+        `working fire stations.`;
+    }
+
+    // scroll the page down to the final block
+    if (stationSectionEl) {
+      stationSectionEl.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  });
+}
+
+// ---------- ARROW NAVIGATION ----------
+// makes the arrow buttons scroll to the next stat block
+function setupStatNavigation() {
+
+  const buttons = document.querySelectorAll(".nextStatBtn");
+
+  buttons.forEach((button) => {
+
+    button.addEventListener("click", () => {
+
+      const targetId = button.dataset.target;
+      const targetEl = document.getElementById(targetId);
+
+      if (targetEl) {
+        targetEl.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+    });
+
+  });
+
 }
 
 // ---------- HELPER FUNCTIONS ----------

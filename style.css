@@ -89,7 +89,7 @@ body {
 }
 
 #startButton:hover {
-  background: #2e86c1;
+  background: #000000;
 }
 
 #mapScreen,
@@ -137,12 +137,14 @@ body {
 
 #resultMapWrapper {
   width: 100%;
+  position: sticky;
+  top: 20px;
+  align-self: start;
 }
 
 #infoPanel {
   background: #ffffff;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
+  
   padding: 20px;
   min-height: 700px;
   box-sizing: border-box;
@@ -161,7 +163,35 @@ body {
 .statBlock {
   margin-bottom: 18px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #ececec;
+}
+
+/* upper sentence line before the large number */
+.statLead {
+  font-size: 20px;
+  line-height: 1.5;
+  color: #444;
+  text-align: center;
+  margin: 0 0 18px 0;
+}
+
+/* the large central number */
+.statBigNumber {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  color: #111;
+  margin: 0 0 18px 0;
+}
+
+/* lower sentence line after the large number */
+.statTrail {
+  font-size: 20px;
+  line-height: 1.5;
+  color: #444;
+  text-align: center;
+  max-width: 24ch;
+  margin: 0 auto;
 }
 
 .statLabel {
@@ -181,6 +211,100 @@ body {
   color: #444;
   margin-top: 6px;
   line-height: 1.4;
+}
+
+.statSection {
+  min-height: 80vh; /* each stat takes most of the screen height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.statSentence {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #444;
+  max-width: 32ch;
+  margin-top: 16px;
+}
+
+/* smaller note text shown below the main sentence and above the arrow */
+.statNote {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #666;
+  text-align: center;
+  max-width: 34ch;
+  margin: 14px auto 0 auto;
+}
+
+/* inline hover term for small explanations */
+.tooltipTerm {
+  position: relative;
+  display: inline-block;
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+/* hidden explanation box shown on hover */
+.tooltipBox {
+  visibility: hidden;
+  opacity: 0;
+
+  position: absolute;
+  left: 50%;
+  bottom: 125%;
+  transform: translateX(-50%);
+
+  width: 220px;
+  padding: 10px 12px;
+
+  background: #ffffff;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+
+  transition: opacity 0.15s ease;
+  z-index: 30;
+}
+
+/* show the explanation when hovering over the term */
+.tooltipTerm:hover .tooltipBox {
+  visibility: visible;
+  opacity: 1;
+}
+
+.nextStatBtn {
+  display: block;
+  margin: 40px auto;
+  margin-top: 28px;
+  width: 52px;
+  height: 52px;
+  border-width: 1px;
+  border-radius: 50%;
+  background: none;
+  color: #000000;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.nextStatBtn:hover {
+  background: #000000;
+  color: white;
+  transform: translateY(2px);
+  animation: bounceArrow 2s infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
 }
 
 /* --- OPTIONAL: make layout stack on smaller screens --- */
@@ -224,4 +348,17 @@ body {
   background: #000000;
   color: white;
   transform: translateY(-1px);
+}
+
+/* sticky white header for the stats panel */
+#infoHeader {
+  position: sticky;
+  top: 20px;
+  z-index: 20;
+
+  background: white;
+  padding: 10px 0 10px 0;   /* white space under the title before the border */
+  margin-bottom: 28px;      /* pushes the content lower */
+
+  border-bottom: 1px solid #eee;
 }
