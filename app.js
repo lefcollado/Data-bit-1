@@ -106,7 +106,7 @@ function drawBezirksregionen() {
   selectedBzrFeature = null;
   selectedPlanungsraumFeature = null;
 
-  statusEl.textContent = "Step 1: Click your Bezirksregion.";
+  statusEl.textContent = "Do you want to look up where you live? Or where you work? Where your kids go to school? Anything is possible. Click on your Bezirksregion.";
   resetBtn.hidden = true;
 
   if (bezirksregionenLayer) {
@@ -119,10 +119,10 @@ function drawBezirksregionen() {
 
   bezirksregionenLayer = L.geoJSON(allBezirksregionen, {
     style: {
-      color: "#333",
+      color: "#00283A",
       weight: 2,
-      fillColor: "#5dade2",
-      fillOpacity: 0.45
+      fillColor: "#004B6D",
+      fillOpacity: 0.10
     },
     onEachFeature: (feature, layer) => {
       const name = feature.properties?.[BZR_NAME_FIELD] || "Bezirksregion";
@@ -169,10 +169,10 @@ function showPlanungsraeumeForBzr(clickedBzrFeature) {
   // show selected BZR only
   bezirksregionenLayer = L.geoJSON(clickedBzrFeature, {
     style: {
-      color: "#1f2d3d",
+      color: "#00283A",
       weight: 3,
-      fillColor: "#85c1e9",
-      fillOpacity: 0.25
+      fillColor: "#004B6D",
+      fillOpacity: 0
     }
   }).addTo(mainMap);
 
@@ -186,10 +186,10 @@ function showPlanungsraeumeForBzr(clickedBzrFeature) {
 
   planungsraeumeLayer = L.geoJSON(filteredPlanungsraeume, {
     style: {
-      color: "#b03a2e",
+      color: "#E6001A",
       weight: 2,
-      fillColor: "#f5b7b1",
-      fillOpacity: 0.55
+      fillColor: "#FF1A34",
+      fillOpacity: 0.15
     },
     onEachFeature: (feature, layer) => {
       const name =
@@ -221,7 +221,7 @@ function showPlanungsraeumeForBzr(clickedBzrFeature) {
 
   mainMap.fitBounds(bezirksregionenLayer.getBounds(), { padding: [20, 20] });
 
-  statusEl.textContent = `Step 2: Click your Planungsraum inside ${selectedBzrName}.`;
+  statusEl.textContent = `Now select your Planungsraum inside ${selectedBzrName}.`;
   resetBtn.hidden = false;
 }
 
@@ -283,10 +283,10 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
         String(feature.properties?.[BZR_ID_FIELD]) === selectedBzrId;
 
       return {
-        color: isSelected ? "#1f2d3d" : "#666",
-        weight: isSelected ? 3 : 2,
-        fillColor: isSelected ? "#aed6f1" : "#e5e7e9",
-        fillOpacity: isSelected ? 0.45 : 0.35
+        color: isSelected ? "#00283A" : "#004B6D",
+        weight: isSelected ? 3 : 1,
+        fillColor: isSelected ? "#004B6D" : "#e5e7e9",
+        fillOpacity: isSelected ? 0.25 : 0
       };
     },
     onEachFeature: (feature, layer) => {
@@ -298,10 +298,10 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
   // Draw selected Planungsraum highlighted
   resultSelectedPlanungsraumLayer = L.geoJSON(planungsraumFeature, {
     style: {
-      color: "#c0392b",
+      color: "#e6001a",
       weight: 4,
-      fillColor: "#f1948a",
-      fillOpacity: 0.85
+      fillColor: "#FF1A34",
+      fillOpacity: 0.45
     },
     onEachFeature: (feature, layer) => {
       const name =
