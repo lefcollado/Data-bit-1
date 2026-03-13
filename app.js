@@ -36,11 +36,43 @@ const citywideLegendNote = document.getElementById("citywideLegendNote");
 const citywideNextBtn = document.getElementById("citywideNextBtn");
 const startOverBtn = document.getElementById("startOverBtn");
 
-startButton.addEventListener("click", () => {
-  mapScreen.scrollIntoView({ behavior: "smooth" });
+// show only one main section at a time
+function showScreen(screenId) {
+  const screens = [
+    "welcomeScreen",
+    "mapScreen",
+    "resultScreen",
+    "citywideMapScreen"
+  ];
 
+  // hide all sections first
+  screens.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = "none";
+    }
+  });
+
+  // show the requested section
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.style.display = "block";
+  }
+}
+
+// when the START button is clicked, show the map section
+startButton.addEventListener("click", () => {
+  showScreen("mapScreen");
+
+  // wait until the section becomes visible, then resize and fit the map
   setTimeout(() => {
     mainMap.invalidateSize();
+
+    if (bezirksregionenLayer) {
+      mainMap.fitBounds(bezirksregionenLayer.getBounds(), {
+        padding: [20, 20]
+      });
+    }
   }, 500);
 });
 
@@ -123,7 +155,10 @@ async function loadData() {
   console.log("PLR stats loaded:", plrStatsData);
 
   drawBezirksregionen();
-  drawCitywideMap();
+  
+  // when the page first loads, show only the welcome screen
+  showScreen("welcomeScreen");
+
   // activate the citywide thematic map switches
   setupCitywideSwitches();
 
@@ -204,6 +239,9 @@ layer.on("mouseout", function () {
       });
     }
   }).addTo(mainMap);
+
+  // make sure Leaflet recalculates size before fitting bounds
+  mainMap.invalidateSize();
 
   mainMap.fitBounds(bezirksregionenLayer.getBounds(), { padding: [20, 20] });
 }
@@ -377,6 +415,9 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
 
   resultStatusEl.textContent =
     `Selected Planungsraum inside ${selectedBzrName} and neighboring Bezirksregionen.`;
+
+  // show the results section before scrolling to it
+  showScreen("resultScreen");
 
   resultScreen.scrollIntoView({ behavior: "smooth" });
 
@@ -777,12 +818,7 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
 
   // zoom map to all Planungsräume
   citywideMap.fitBounds(citywidePlrLayer.getBounds(), {
-    padding: [20, 20]
-  });
-
-  const tighterZoom = citywideMap.getZoom() + 1;  
- 
-
+    padding: [20, 20]});
 }
 
 // ---------- CITYWIDE FIRE STATIONS ----------
@@ -938,7 +974,7 @@ function updateCitywideLegend(metricField) {
 }
 
 // ---------- CITYWIDE SECTION NAVIGATION ----------
-// scrolls to the Berlin-wide section and refreshes the map size
+// show the Berlin-wide section when the last local-stat button is clicked
 function setupBerlinOverviewButton() {
   const berlinOverviewBtn = document.getElementById("berlinOverviewBtn");
   const citywideMapScreen = document.getElementById("citywideMapScreen");
@@ -948,16 +984,22 @@ function setupBerlinOverviewButton() {
   }
 
   berlinOverviewBtn.addEventListener("click", () => {
-    // scroll to the citywide thematic map section
+    // make the citywide screen visible first
+    showScreen("citywideMapScreen");
+
+    // then scroll to it
     citywideMapScreen.scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
 
-    // refresh Leaflet size after scrolling
+    // once the section is visible, resize Leaflet and draw the active layer
     setTimeout(() => {
       citywideMap.invalidateSize();
-    }, 500);
+
+      // draw the map only after the section is visible
+      drawCitywideMap(activeCitywideMetric);
+    }, 300);
   });
 }
 
@@ -1011,19 +1053,12 @@ function setupCitywideNavigation() {
     });
   }
 
-  // restart button scrolls back to the welcome screen
-  if (startOverBtn) {
-    startOverBtn.addEventListener("click", () => {
-      const welcomeScreen = document.getElementById("welcomeScreen");
-
-      if (welcomeScreen) {
-        welcomeScreen.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
-    });
-  }
+  // restart button reloads the page and returns to a clean welcome screen
+    if (startOverBtn) {
+      startOverBtn.addEventListener("click", () => {
+        window.location.reload();
+     });
+    }
 }
 
 // ---------- HELPER FUNCTIONS ----------
@@ -1051,14 +1086,19 @@ function formatPercent(value) {
   }) + "%";
 }
 
-// ----------- RESET -----------
+// reset from PLR selection back to the Bezirksregion map
 resetBtn.addEventListener("click", () => {
   drawBezirksregionen();
-
-  mapScreen.scrollIntoView({ behavior: "smooth" });
+  showScreen("mapScreen");
 
   setTimeout(() => {
     mainMap.invalidateSize();
+
+    if (bezirksregionenLayer) {
+      mainMap.fitBounds(bezirksregionenLayer.getBounds(), {
+        padding: [20, 20]
+      });
+    }
   }, 500);
 });
 
