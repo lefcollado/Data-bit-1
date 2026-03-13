@@ -409,6 +409,77 @@ body {
   text-align: left;
 }
 
+/* controls above the citywide map */
+.citywideControls {
+  padding-bottom: 24px;
+}
+
+/* one row = text on the left, switch on the right */
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-left: 24px;
+  margin-right: 24px;
+  margin-bottom: 14px;
+
+  cursor: pointer;
+}
+
+/* text label next to each switch */
+.switchLabel {
+  font-size: 17px;
+  line-height: 1.4;
+  color: #222;
+}
+
+/* hide the native checkbox */
+.switchRow input {
+  display: none;
+}
+
+/* switch track */
+.switchSlider {
+  position: relative;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 30px;
+
+  background: #d1d5db;
+  border-radius: 999px;
+
+  transition: background 0.2s ease;
+}
+
+/* switch knob */
+.switchSlider::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+
+  width: 24px;
+  height: 24px;
+
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+
+  transition: transform 0.2s ease;
+}
+
+/* active state */
+.switchRow input:checked + .switchSlider {
+  background: #111;
+}
+
+/* move knob when active */
+.switchRow input:checked + .switchSlider::before {
+  transform: translateX(22px);
+}
+
 #citywideMapScreen h1 {
   margin-bottom: 10px;
   margin-left: 24px;

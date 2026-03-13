@@ -24,6 +24,10 @@ const resetBtn = document.getElementById("resetBtn");
 // references to elements in the right-side info panel
 const infoTitleEl = document.getElementById("infoTitle");
 const infoContentEl = document.getElementById("infoContent");
+// citywide thematic map switches
+const toggleTotMissions = document.getElementById("toggleTotMissions");
+const toggleMiss1000p = document.getElementById("toggleMiss1000p");
+const toggleCemsMedian = document.getElementById("toggleCemsMedian");
 
 startButton.addEventListener("click", () => {
   mapScreen.scrollIntoView({ behavior: "smooth" });
@@ -110,6 +114,8 @@ async function loadData() {
 
   drawBezirksregionen();
   drawCitywideMap();
+  // activate the citywide thematic map switches
+  setupCitywideSwitches();
 
   // ensure Leaflet recalculates map size after rendering
 setTimeout(() => {
@@ -689,29 +695,85 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
 
   citywidePlrLayer = L.geoJSON(plrStatsData, {
     style: (feature) => {
+      const value = feature.properties?.[metricField];
+
       return {
-        color: "#222222",   // PLR borders
-        weight: 1,
-        fillColor: "#999999", // placeholder color for now
-        fillOpacity: 0.45     // placeholder opacity for now
+        color: "#8b8b8b", // keep borders dark and consistent
+        weight: .2,
+        fillColor: getCitywideFillColor(value, metricField),
+        fillOpacity: 1
       };
     },
 
     onEachFeature: (feature, layer) => {
       const props = feature.properties;
 
-      // popup for quick inspection while developing symbology
-      layer.bindPopup(`
-        <strong>${props.PLR_Name}</strong><br>
-        Total missions: ${formatInteger(props.tot_m_25)}<br>
-        Missions per 1000 people: ${formatDecimal(props.miss_1000p)}<br>
-        Critical EMS median response: ${formatDecimal(props.cems_med_min)} min
-      `);
+  // show a metric-specific popup depending on the active layer
+  let popupMetricLine = "";
+
+  if (metricField === "tot_m_25") {
+    popupMetricLine = `Total missions in 2025: ${formatInteger(props.tot_m_25)}`;
+  }
+
+  if (metricField === "mis_1000p") {
+    popupMetricLine = `Missions per 1,000 people: ${formatDecimal(props.mis_1000p)}`;
+  }
+
+  if (metricField === "cems_med_min") {
+    popupMetricLine = `Median response time for critical EMS missions: ${formatDecimal(props.cems_med_min)} minutes`;
+  }
+
+  layer.bindPopup(`
+    <strong>${props.PLR_Name}</strong><br>
+    ${popupMetricLine}
+  `);
     }
   }).addTo(citywideMap);
 
   // zoom map to all PLR boundaries
   citywideMap.fitBounds(citywidePlrLayer.getBounds(), { padding: [20, 20] });
+}
+
+// ---------- CITYWIDE CHOROPLETH COLORS ----------
+// returns the fill color for each PLR depending on the selected metric
+function getCitywideFillColor(value, metricField) {
+  // handle missing or invalid values
+  if (value === null || value === undefined || isNaN(value)) {
+    return "#d9d9d9";
+  }
+
+  const numericValue = Number(value);
+
+  // total missions in 2025
+  if (metricField === "tot_m_25") {
+    if (numericValue <= 500) return "#f2f0f7";
+    if (numericValue <= 750) return "#dadaeb";
+    if (numericValue <= 1000) return "#bcbddc";
+    if (numericValue <= 1250) return "#9e9ac8";
+    return "#6a51a3";
+  }
+
+  // missions per 1000 people
+  if (metricField === "mis_1000p") {
+    if (numericValue <= 102) return "#eff3ff";
+    if (numericValue <= 120) return "#bdd7e7";
+    if (numericValue <= 138) return "#6baed6";
+    if (numericValue <= 166) return "#3182bd";
+    return "#08519c";
+  }
+
+  // median response time for critical EMS missions, in minutes
+  if (metricField === "cems_med_min") {
+    if (numericValue <= 8) return "#fff7bc";
+    if (numericValue <= 9) return "#fee391";
+    if (numericValue <= 10) return "#fec44f";
+    if (numericValue <= 11) return "#fe9929";
+    if (numericValue <= 12) return "#ef3b2c";
+    return "#bd0026";
+  }
+
+  // fallback
+  return "#cccccc";
 }
 
 // ---------- CITYWIDE SECTION NAVIGATION ----------
@@ -735,6 +797,39 @@ function setupBerlinOverviewButton() {
     setTimeout(() => {
       citywideMap.invalidateSize();
     }, 500);
+  });
+}
+
+// ---------- CITYWIDE MAP SWITCHES ----------
+// only one thematic variable should be active at a time
+function setupCitywideSwitches() {
+  if (!toggleTotMissions || !toggleMiss1000p || !toggleCemsMedian) {
+    return;
+  }
+
+  // helper to activate one switch and turn the other two off
+  function activateSwitch(selected) {
+    toggleTotMissions.checked = selected === "tot_m_25";
+    toggleMiss1000p.checked = selected === "mis_1000p";
+    toggleCemsMedian.checked = selected === "cems_med_min";
+
+    // redraw map using the chosen variable
+    drawCitywideMap(selected);
+  }
+
+  // total missions
+  toggleTotMissions.addEventListener("change", () => {
+    activateSwitch("tot_m_25");
+  });
+
+  // missions per 1,000 people
+  toggleMiss1000p.addEventListener("change", () => {
+    activateSwitch("mis_1000p");
+  });
+
+  // critical EMS median response time
+  toggleCemsMedian.addEventListener("change", () => {
+    activateSwitch("cems_med_min");
   });
 }
 
