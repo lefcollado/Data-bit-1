@@ -704,29 +704,53 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
       };
     },
 
-    onEachFeature: (feature, layer) => {
-      const props = feature.properties;
+  onEachFeature: (feature, layer) => {
+  const props = feature.properties;
 
-  // show a metric-specific popup depending on the active layer
-  let popupMetricLine = "";
+  let tooltipMetricLine = "";
 
+  // choose the line shown in the hover label depending on the active map
   if (metricField === "tot_m_25") {
-    popupMetricLine = `Total missions in 2025: ${formatInteger(props.tot_m_25)}`;
+    tooltipMetricLine = `Total missions in 2025: ${formatInteger(props.tot_m_25)}`;
   }
 
   if (metricField === "mis_1000p") {
-    popupMetricLine = `Missions per 1000 people: ${formatDecimal(props.mis_1000p)}`;
+    tooltipMetricLine = `Missions per 1,000 people: ${formatDecimal(props.mis_1000p)}`;
   }
 
   if (metricField === "cems_med_min") {
-    popupMetricLine = `Median response time for critical EMS missions: ${formatDecimal(props.cems_med_min)} minutes`;
+    tooltipMetricLine = `Median critical EMS response time: ${formatDecimal(props.cems_med_min)} minutes`;
   }
 
-  layer.bindPopup(`
-    <strong>${props.PLR_Name}</strong><br>
-    ${popupMetricLine}
-  `);
+  // show PLR name + active metric on hover, without clicking
+  layer.bindTooltip(
+    `<strong>${props.PLR_Name}</strong><br>${tooltipMetricLine}`,
+    {
+      sticky: true,
+      direction: "top",
+      opacity: 0.95
     }
+  );
+
+  // make hovered PLR stand out with a thicker black border
+  layer.on("mouseover", function () {
+    this.setStyle({
+      color: "#000000",
+      weight: 2.5
+    });
+
+    // keep hovered border above neighboring polygons
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+      this.bringToFront();
+    }
+  });
+
+  // restore the normal style when the mouse leaves
+  layer.on("mouseout", function () {
+    citywidePlrLayer.resetStyle(this);
+  });
+}
+
   }).addTo(citywideMap);
 
   // zoom map to all Planungsräume
