@@ -31,6 +31,7 @@ const toggleCemsMedian = document.getElementById("toggleCemsMedian");
 // citywide legend elements
 const citywideLegendTitle = document.getElementById("citywideLegendTitle");
 const citywideLegendItems = document.getElementById("citywideLegendItems");
+const citywideLegendNote = document.getElementById("citywideLegendNote");
 
 startButton.addEventListener("click", () => {
   mapScreen.scrollIntoView({ behavior: "smooth" });
@@ -645,19 +646,11 @@ function setupStationReveal() {
 // ---------- CITYWIDE THEMATIC MAP ----------
 // full-width map for Berlin-wide PLR patterns
 const citywideMap = L.map("citywideMap", {
-  zoomControl: true
+  zoomControl: true,
+  zoomSnap: 0.1,
+  zoomDelta: 0.5
 });
 
-// light basemap for the citywide view
-L.tileLayer(
-  "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-  {
-    attribution: "&copy; OpenStreetMap &copy; CARTO",
-    subdomains: "abcd",
-    maxZoom: 20,
-    opacity: 0.8
-  }
-).addTo(citywideMap);
 
 // ---------- ARROW NAVIGATION ----------
 // makes the arrow buttons scroll to the next stat block
@@ -704,8 +697,8 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
       const value = feature.properties?.[metricField];
 
       return {
-        color: "#8b8b8b", // keep borders dark and consistent
-        weight: .2,
+        color: "#ffffff", // keep borders dark and consistent
+        weight: .5,
         fillColor: getCitywideFillColor(value, metricField),
         fillOpacity: 1
       };
@@ -736,8 +729,14 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
     }
   }).addTo(citywideMap);
 
-  // zoom map to all PLR boundaries
-  citywideMap.fitBounds(citywidePlrLayer.getBounds(), { padding: [20, 20] });
+  // zoom map to all Planungsräume
+  citywideMap.fitBounds(citywidePlrLayer.getBounds(), {
+    padding: [20, 20]
+  });
+
+  const tighterZoom = citywideMap.getZoom() + 1;  
+ 
+
 }
 
 // ---------- CITYWIDE CHOROPLETH COLORS ----------
@@ -761,11 +760,11 @@ function getCitywideFillColor(value, metricField) {
 
   // missions per 1000 people
   if (metricField === "mis_1000p") {
-    if (numericValue <= 102) return "#eff3ff";
-    if (numericValue <= 120) return "#bdd7e7";
-    if (numericValue <= 138) return "#6baed6";
-    if (numericValue <= 166) return "#3182bd";
-    return "#08519c";
+    if (value <= 102) return "#fde0dd";
+    if (value <= 120) return "#fbb4b9";
+    if (value <= 138) return "#f768a1";
+    if (value <= 166) return "#c51b8a";
+    return "#7a0177";
   }
 
   // median response time for critical EMS missions, in minutes
@@ -806,11 +805,11 @@ function updateCitywideLegend(metricField) {
   if (metricField === "mis_1000p") {
     title = "Missions per 1.000 people";
     items = [
-      { color: "#eff3ff", label: "up to 102" },
-      { color: "#bdd7e7", label: "102 – 120" },
-      { color: "#6baed6", label: "120 – 138" },
-      { color: "#3182bd", label: "138 – 166" },
-      { color: "#08519c", label: "166 or more" }
+      { color: "#fde0dd", label: "up to 102" },
+      { color: "#fbb4b9", label: "102 – 120" },
+      { color: "#f768a1", label: "120 – 138" },
+      { color: "#c51b8a", label: "138 – 166" },
+      { color: "#7a0177", label: "166 or more" }
     ];
   }
 
@@ -834,6 +833,14 @@ function updateCitywideLegend(metricField) {
       <span class="legendLabel">${item.label}</span>
     </div>
   `).join("");
+
+  // show explanatory note only for missions per 1000 people
+  if (metricField === "mis_1000p") {
+    citywideLegendNote.textContent =
+      "Some areas have more residents than others. Showing missions per 1.000 people makes it easier to compare how frequent emergencies are across different parts of the city.";
+  } else {
+    citywideLegendNote.textContent = "";
+  }
 }
 
 // ---------- CITYWIDE SECTION NAVIGATION ----------

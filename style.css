@@ -145,6 +145,7 @@ body {
   margin-left: 24px;
   line-height: 1.6;
 }
+
 #resultStatus {
   margin-top: 0;
   margin-bottom: 12px;
@@ -485,27 +486,17 @@ body {
   transform: translateX(22px);
 }
 
-#citywideMapScreen h1 {
-  margin-bottom: 10px;
-  margin-left: 24px;
-}
-
-#citywideMapScreen p {
-  margin-top: 0;
-  margin-bottom: 24px;
-  margin-left: 24px;
-  line-height: 1.6;
-}
-
 .citywideHeader h1 {
   margin-top: 0;
   margin-bottom: 6px;
+  margin-left: 24px;
 }
 
 .citywideHeader p {
   line-height: 1.6;
   margin-top: 0;
   margin-bottom: 24px;
+  margin-left: 24px;
 }
 
 /* two-column layout for the Berlin-wide section */
@@ -527,9 +518,9 @@ body {
 #citywideMap {
   width: 100%;
   height: 760px;
-  background: #eef2f3;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -549,6 +540,7 @@ body {
 #citywideLegend {
   margin-top: 20px;
   margin-left: 20px;
+  margin-bottom: 14px;
   padding-top: 40px;
   border-top: 1px solid #e5e5e5;
 }
@@ -573,6 +565,7 @@ body {
   border-radius: 2px;
   border: 1px solid rgba(0, 0, 0, 0.15);
   flex: 0 0 18px;
+  gap: 12px;
 }
 
 .legendLabel {
@@ -587,4 +580,14 @@ body {
   line-height: 1.5;
   margin-top: 24px;
   margin-bottom: 20px;
+  margin-left: 24px;
+}
+
+#citywideLegendNote {
+  margin: 24px 0 0 0;
+  padding-left: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #555;
+  max-width: 400px;
 }
