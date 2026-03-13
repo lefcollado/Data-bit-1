@@ -29,20 +29,37 @@ body {
   text-align: center;
 }
 
-/* make map pages ignore the normal 1100px content width */
+/* make map page wrappers full-width */
 #mapScreen .page,
-#resultScreen .page {
+#resultScreen .page,
+#citywideMapScreen .page {
   max-width: none;
   width: 100%;
   margin: 0;
-  padding: 0; /* make map pages fully edge-to-edge */
+  padding: 0;
+}
+
+/* full-width section for the citywide thematic map */
+#citywideMapScreen {
+  min-height: 100vh;
+  background: white;
+  padding-top: 40px;
 }
 
 /* give padding only to the text elements above the map */
-#mapScreen h1,
-#mapScreen p,
+#mapScreen h1{
+  margin-bottom: 10px;
+  margin-left: 24px;
+}
+#mapScreen p{
+  margin-top: 0;
+  margin-left: 24px;
+}
 #mapScreen button,
-#resultScreen h1,
+#resultScreen h1{
+  margin-bottom: 10px;
+  margin-left: 24px;
+}
 #resultScreen p {
   padding-left: 24px;
   padding-right: 24px;
@@ -123,10 +140,16 @@ body {
   border: 1px solid #ccc;
 }
 
-#status,
+#status{
+  margin-bottom: 15px;
+  margin-left: 24px;
+  line-height: 1.6;
+}
 #resultStatus {
   margin-top: 0;
   margin-bottom: 12px;
+  line-height: 1.6;
+  
 }
 
 #resetBtn {
@@ -300,7 +323,31 @@ body {
   50% { transform: translateY(6px); }
 }
 
-/* --- OPTIONAL: make layout stack on smaller screens --- */
+/* button leading from the local story to the Berlin-wide map */
+.nextSectionBtn {
+  display: block;
+  margin: 50px auto 0 auto;
+  padding: 12px 20px;
+
+  border: none;
+  border-radius: 40px;
+
+  background: #E6001A;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.nextSectionBtn:hover {
+  background: #000000;
+  transform: translateY(1px);
+}
+
+/* --- make layout stack on smaller screens --- */
 
 @media (max-width: 900px) {
   #resultLayout {
@@ -354,4 +401,42 @@ body {
   margin-bottom: 28px;      /* pushes the content lower */
 
   border-bottom: 1px solid #eee;
+}
+
+/* text block above the full-width map */
+.citywideHeader {
+  padding-bottom: 24px;
+  text-align: left;
+}
+
+#citywideMapScreen h1 {
+  margin-bottom: 10px;
+  margin-left: 24px;
+}
+
+#citywideMapScreen p {
+  margin-top: 0;
+  margin-bottom: 24px;
+  margin-left: 24px;
+  line-height: 1.6;
+}
+
+.citywideHeader h1 {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.citywideHeader p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+/* full-width map container */
+#citywideMap {
+  width: 100%;
+  height: 100vh;
+  background: #eef2f3;
+  border-top: 1px solid #ddd;
 }

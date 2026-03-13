@@ -11,6 +11,8 @@ const STAT_TOTAL_MISSIONS = "tot_m_25";
 const STAT_CEMS_PERCENT = "cems_perc";
 const STAT_FIRE_PERCENT = "fire_perc";
 const STAT_CEMS_1000P = "cems_1000p";
+const STAT_CEMS_MED_MIN = "cems_med_min";
+
 
 // ----------- PAGE / UI ELEMENTS -----------
 const mapScreen = document.getElementById("mapScreen");
@@ -73,6 +75,14 @@ let selectedPlanungsraumFeature = null;
 
 let plrStatsData;
 
+// ---------- CITYWIDE MAP STATE ----------
+// layer holding all Planungsräume for the thematic map
+let citywidePlrLayer;
+
+// currently selected variable for the thematic map
+let activeCitywideMetric = "tot_m_25";
+
+
 // ----------- LOAD DATA -----------
 async function loadData() {
   const [
@@ -99,6 +109,12 @@ async function loadData() {
   console.log("PLR stats loaded:", plrStatsData);
 
   drawBezirksregionen();
+  drawCitywideMap();
+
+  // ensure Leaflet recalculates map size after rendering
+setTimeout(() => {
+  citywideMap.invalidateSize();
+}, 300);
 }
 
 // ----------- STEP 1: SHOW ALL BZR -----------
@@ -106,7 +122,10 @@ function drawBezirksregionen() {
   selectedBzrFeature = null;
   selectedPlanungsraumFeature = null;
 
-  statusEl.textContent = "Do you want to look up where you live? Or where you work? Where your kids go to school? Anything is possible. Click on your Bezirksregion.";
+  statusEl.innerHTML = 
+  "Do you want to look up where you live? Or where you work? <br>" +
+  "Where your kids go to school? Anything is possible.<br>" +
+  "<strong>Click on your Bezirksregion:</strong>";
   resetBtn.hidden = true;
 
   if (bezirksregionenLayer) {
@@ -130,16 +149,33 @@ function drawBezirksregionen() {
 
       layer.bindPopup(`<strong>${name}</strong>`);
 
+      // when hovering one Bezirksregion, fade all the others
       layer.on("mouseover", function () {
-        this.setStyle({
-          weight: 3,
-          fillOpacity: 0.7
+        bezirksregionenLayer.eachLayer((otherLayer) => {
+          if (otherLayer === this) {
+            otherLayer.setStyle({
+              color: "#000000",   // keep hovered region clearly outlined
+              weight: 3,
+              fillColor: "#000000",
+              fillOpacity: 0.12   // keep its normal low-opacity fill
+            });
+          } else {
+            otherLayer.setStyle({
+              color: "#000000",   // keep borders visible
+              weight: 0.5,
+              fillColor: "#000000",
+              fillOpacity: 0.01   // fade all other regions further
+            });
+          }
         });
       });
 
-      layer.on("mouseout", function () {
-        bezirksregionenLayer.resetStyle(this);
-      });
+// when the mouse leaves, restore all Bezirksregionen to the default style
+layer.on("mouseout", function () {
+  bezirksregionenLayer.eachLayer((otherLayer) => {
+    bezirksregionenLayer.resetStyle(otherLayer);
+  });
+});
 
       layer.on("click", function () {
         console.log("Clicked Bezirksregion:", feature.properties);
@@ -189,7 +225,7 @@ function showPlanungsraeumeForBzr(clickedBzrFeature) {
       color: "#E6001A",
       weight: 2,
       fillColor: "#FF1A34",
-      fillOpacity: 0.15
+      fillOpacity: 0.1
     },
     onEachFeature: (feature, layer) => {
       const name =
@@ -197,16 +233,33 @@ function showPlanungsraeumeForBzr(clickedBzrFeature) {
 
       layer.bindPopup(`<strong>${name}</strong>`);
 
-      layer.on("mouseover", function () {
-        this.setStyle({
-          weight: 3,
-          fillOpacity: 0.8
-        });
+      // when hovering one Planungsraum, fade the others
+layer.on("mouseover", function () {
+  planungsraeumeLayer.eachLayer((otherLayer) => {
+    if (otherLayer === this) {
+      otherLayer.setStyle({
+        color: "#E6001A",   // keep hovered PLR clearly outlined
+        weight: 5,
+        fillColor: "#FF1A34",
+        fillOpacity: 0.15   // keep its normal low-opacity fill
       });
+    } else {
+      otherLayer.setStyle({
+        color: "#E6001A",   // keep borders visible
+        weight: 3,
+        fillColor: "#FF1A34",
+        fillOpacity: 0.05   // fade all other PLR further
+      });
+    }
+  });
+});
 
-      layer.on("mouseout", function () {
-        planungsraeumeLayer.resetStyle(this);
-      });
+// when the mouse leaves, restore all PLR to the default style
+layer.on("mouseout", function () {
+  planungsraeumeLayer.eachLayer((otherLayer) => {
+    planungsraeumeLayer.resetStyle(otherLayer);
+  });
+});
 
       layer.on("click", function () {
         console.log("Clicked Planungsraum:", feature.properties);
@@ -272,10 +325,10 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
         String(feature.properties?.[BZR_ID_FIELD]) === selectedBzrId;
 
       return {
-        color: isSelected ? "#000000ff" : "#000000ff",
-        weight: isSelected ? 3 : 1,
-        fillColor: isSelected ? "#000000ff" : "#e5e7e9",
-        fillOpacity: isSelected ? 0.25 : 0
+        color: "#000000",
+        weight: isSelected ? 3 : .5,
+        fillColor: "#000000",
+        fillOpacity: isSelected ? .2 : 0
       };
     },
     onEachFeature: (feature, layer) => {
@@ -288,7 +341,7 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
   resultSelectedPlanungsraumLayer = L.geoJSON(planungsraumFeature, {
     style: {
       color: "#e6001a",
-      weight: 4,
+      weight: 3,
       fillColor: "#FF1A34",
       fillOpacity: 0.45
     },
@@ -303,7 +356,7 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
   resultMap.fitBounds(resultBzrLayer.getBounds(), { padding: [30, 30] });
 
   resultStatusEl.textContent =
-    `Selected Planungsraum shown inside ${selectedBzrName} and neighboring Bezirksregionen, with fire station locations.`;
+    `Selected Planungsraum inside ${selectedBzrName} and neighboring Bezirksregionen.`;
 
   resultScreen.scrollIntoView({ behavior: "smooth" });
 
@@ -478,18 +531,57 @@ infoContentEl.innerHTML = `
     <div class="statBigNumber" id="stationCountValue">–</div>
 
     <p class="statTrail" id="stationCountSentence">
-      working fire stations.
+      working
+    <span class="tooltipTerm">
+          fire stations
+          <span class="tooltipBox">
+            There are three types of fire stations:<br>
+            <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
+            <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr) <br>
+            <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)
+            <br><br>
+          </span>
+        </span>.
     </p>
 
     <p class="statNote">As of 2025, there are 102 fire stations distributed through the city of Berlin.</p>
 
+    <button class="nextStatBtn" data-target="stat-cems-median">↓</button>
+
   </section>
+
+<section class="statSection" id="stat-cems-median">
+  <p class="statLead">
+    In ${plrName}, the 
+    <span class="tooltipTerm">
+      median
+      <span class="tooltipBox">
+       This means that half of all missions in this Planungsraum were reached in this time or less, and half took longer.
+      </span>
+    </span>
+    response time for critical EMS missions is
+  </p>
+
+  <div class="statBigNumber">${formatDecimal(stats[STAT_CEMS_MED_MIN])}</div>
+
+  <p class="statTrail">
+    minutes.
+  </p>
+
+  <button class="nextSectionBtn" id="berlinOverviewBtn">
+    ↓ What about the rest of Berlin?
+  </button>
+
+</section>
+
 `;
 
 // activate the final reveal button after the panel HTML has been inserted
 setupStationReveal();
 // activate arrow navigation after panel content is created
 setupStatNavigation();
+// activate the button leading to the Berlin-wide section
+setupBerlinOverviewButton();
 
 }
 
@@ -516,9 +608,20 @@ function setupStationReveal() {
     }
 
     if (stationCountSentenceEl) {
-      stationCountSentenceEl.textContent =
-        `working fire stations.`;
-    }
+  stationCountSentenceEl.innerHTML = `
+    working
+    <span class="tooltipTerm">
+      fire stations
+      <span class="tooltipBox">
+        There are three types of fire stations:<br>
+        <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
+        <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr)<br>
+        <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)<br><br>
+        Click on the fire stations in the map to see which type are the ones close to you.
+      </span>
+    </span>.
+  `;
+}
 
     // scroll the page down to the final block
     if (stationSectionEl) {
@@ -529,6 +632,23 @@ function setupStationReveal() {
     }
   });
 }
+
+// ---------- CITYWIDE THEMATIC MAP ----------
+// full-width map for Berlin-wide PLR patterns
+const citywideMap = L.map("citywideMap", {
+  zoomControl: true
+});
+
+// light basemap for the citywide view
+L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+  {
+    attribution: "&copy; OpenStreetMap &copy; CARTO",
+    subdomains: "abcd",
+    maxZoom: 20,
+    opacity: 0.8
+  }
+).addTo(citywideMap);
 
 // ---------- ARROW NAVIGATION ----------
 // makes the arrow buttons scroll to the next stat block
@@ -554,6 +674,68 @@ function setupStatNavigation() {
 
   });
 
+}
+
+
+// ---------- CITYWIDE THEMATIC MAP DRAWING ----------
+// draws all Planungsräume using the stats GeoJSON and one active metric
+function drawCitywideMap(metricField = activeCitywideMetric) {
+  activeCitywideMetric = metricField;
+
+  // remove old layer before drawing a new one
+  if (citywidePlrLayer) {
+    citywideMap.removeLayer(citywidePlrLayer);
+  }
+
+  citywidePlrLayer = L.geoJSON(plrStatsData, {
+    style: (feature) => {
+      return {
+        color: "#222222",   // PLR borders
+        weight: 1,
+        fillColor: "#999999", // placeholder color for now
+        fillOpacity: 0.45     // placeholder opacity for now
+      };
+    },
+
+    onEachFeature: (feature, layer) => {
+      const props = feature.properties;
+
+      // popup for quick inspection while developing symbology
+      layer.bindPopup(`
+        <strong>${props.PLR_Name}</strong><br>
+        Total missions: ${formatInteger(props.tot_m_25)}<br>
+        Missions per 1000 people: ${formatDecimal(props.miss_1000p)}<br>
+        Critical EMS median response: ${formatDecimal(props.cems_med_min)} min
+      `);
+    }
+  }).addTo(citywideMap);
+
+  // zoom map to all PLR boundaries
+  citywideMap.fitBounds(citywidePlrLayer.getBounds(), { padding: [20, 20] });
+}
+
+// ---------- CITYWIDE SECTION NAVIGATION ----------
+// scrolls to the Berlin-wide section and refreshes the map size
+function setupBerlinOverviewButton() {
+  const berlinOverviewBtn = document.getElementById("berlinOverviewBtn");
+  const citywideMapScreen = document.getElementById("citywideMapScreen");
+
+  if (!berlinOverviewBtn || !citywideMapScreen) {
+    return;
+  }
+
+  berlinOverviewBtn.addEventListener("click", () => {
+    // scroll to the citywide thematic map section
+    citywideMapScreen.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+    // refresh Leaflet size after scrolling
+    setTimeout(() => {
+      citywideMap.invalidateSize();
+    }, 500);
+  });
 }
 
 // ---------- HELPER FUNCTIONS ----------
