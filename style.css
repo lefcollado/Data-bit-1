@@ -17,7 +17,7 @@ body {
 
 .heroHeader {
   background: #F4F6F7;   /* choose any color you like */
-  padding: 90px 20px 10px;
+  padding: 10px 20px 10px;
   width: 100%;
   text-align: center;
   border-bottom: 2px solid;
@@ -244,6 +244,11 @@ body {
   padding: 20px 0;
 }
 
+/* prevent the first stat block from being vertically centered */
+.statSection:first-of-type {
+  justify-content: flex-start;
+  padding-top: 30px;
+}
 
 /* smaller note text shown below the main sentence and above the arrow */
 .statNote {
