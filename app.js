@@ -93,6 +93,9 @@ let citywidePlrLayer;
 // currently selected variable for the thematic map
 let activeCitywideMetric = "tot_m_25";
 
+// fire station overlay for the citywide map
+let citywideFirestationsLayer;
+
 
 // ----------- LOAD DATA -----------
 async function loadData() {
@@ -694,6 +697,13 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
   // update the side legend to match the active thematic layer
   updateCitywideLegend(metricField);
 
+  // show fire stations only for the critical EMS median response map
+  if (metricField === "cems_med_min") {
+    drawCitywideFirestations();
+  } else {
+    removeCitywideFirestations();
+  }
+
   // remove old layer before drawing a new one
   if (citywidePlrLayer) {
     citywideMap.removeLayer(citywidePlrLayer);
@@ -760,6 +770,11 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
 
   }).addTo(citywideMap);
 
+  // keep fire stations above the polygons if this layer is active
+  if (metricField === "cems_med_min" && citywideFirestationsLayer) {
+    citywideFirestationsLayer.bringToFront();
+  }
+
   // zoom map to all Planungsräume
   citywideMap.fitBounds(citywidePlrLayer.getBounds(), {
     padding: [20, 20]
@@ -768,6 +783,47 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
   const tighterZoom = citywideMap.getZoom() + 1;  
  
 
+}
+
+// ---------- CITYWIDE FIRE STATIONS ----------
+// draws the fire station overlay on the citywide map
+function drawCitywideFirestations() {
+  // remove old overlay first if it already exists
+  if (citywideFirestationsLayer) {
+    citywideMap.removeLayer(citywideFirestationsLayer);
+  }
+
+  citywideFirestationsLayer = L.geoJSON(allFirestations, {
+    pointToLayer: (feature, latlng) => {
+      return L.circleMarker(latlng, {
+        radius: 4,
+        color: "#000000",
+        weight: 1,
+        fillColor: "#000000",
+        fillOpacity: 1
+      });
+    },
+
+    onEachFeature: (feature, layer) => {
+      const name = feature.properties?.[FIRESTATION_NAME_FIELD] || "Fire station";
+
+      layer.bindTooltip(
+        `<strong>${name}</strong>`,
+        {
+          sticky: true,
+          direction: "top",
+          opacity: 0.95
+        }
+      );
+    }
+  }).addTo(citywideMap);
+}
+
+// removes the citywide fire station overlay if present
+function removeCitywideFirestations() {
+  if (citywideFirestationsLayer) {
+    citywideMap.removeLayer(citywideFirestationsLayer);
+  }
 }
 
 // ---------- CITYWIDE CHOROPLETH COLORS ----------
@@ -821,6 +877,7 @@ function updateCitywideLegend(metricField) {
 
   let title = "";
   let items = [];
+  let extraLegendItem = "";
 
   if (metricField === "tot_m_25") {
     title = "Total missions in 2025";
@@ -854,6 +911,12 @@ function updateCitywideLegend(metricField) {
       { color: "#ef3b2c", label: "11 – 12 minutes" },
       { color: "#bd0026", label: "12 or more minutes" }
     ];
+    extraLegendItem = `
+    <div class="legendItem">
+      <span class="legendStation"></span>
+      <span class="legendLabel">Fire station</span>
+    </div>
+    `;
   }
 
   citywideLegendTitle.textContent = title;
@@ -863,7 +926,7 @@ function updateCitywideLegend(metricField) {
       <span class="legendSwatch" style="background:${item.color};"></span>
       <span class="legendLabel">${item.label}</span>
     </div>
-  `).join("");
+  `).join("") + extraLegendItem;
 
   // show explanatory note only for missions per 1000 people
   if (metricField === "mis_1000p") {
