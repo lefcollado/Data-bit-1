@@ -141,7 +141,7 @@ body {
 }
 
 #status{
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   margin-left: 24px;
   line-height: 1.6;
 }
@@ -435,8 +435,8 @@ body {
 
 /* text label next to each switch */
 .switchLabel {
-  font-size: 17px;
-  line-height: 1.4;
+  font-size: 16px;
+  line-height: 2;
   color: #222;
 }
 
@@ -503,16 +503,80 @@ body {
 }
 
 .citywideHeader p {
-  font-size: 18px;
   line-height: 1.6;
   margin-top: 0;
   margin-bottom: 24px;
 }
 
-/* full-width map container */
+/* two-column layout for the Berlin-wide section */
+#citywideLayout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* sticky map on the left, same logic as the local section */
+#citywideMapWrapper {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+
+/* map now lives inside the left column, not full-width anymore */
 #citywideMap {
   width: 100%;
-  height: 100vh;
+  height: 760px;
   background: #eef2f3;
-  border-top: 1px solid #ddd;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* right-side panel for switches + legend */
+#citywideSidePanel {
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+
+/* controls now belong to the side panel */
+.citywideControls {
+  padding-bottom: 6px;
+  margin-top: 24px;
+}
+
+/* legend box under the switches */
+#citywideLegend {
+  margin-top: 20px;
+  margin-left: 20px;
+  padding-top: 40px;
+  border-top: 1px solid #e5e5e5;
+}
+
+#citywideLegendTitle {
+  margin-top: 0;
+  margin-bottom: 14px;
+  font-size: 16px;
+}
+
+/* each legend row: color square + text */
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.legendSwatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex: 0 0 18px;
+}
+
+.legendLabel {
+  font-size: 15px;
+  line-height: 1.4;
+  color: #333;
 }

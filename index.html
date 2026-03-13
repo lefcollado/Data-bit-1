@@ -84,33 +84,42 @@
   <div class="page citywideHeader">
     <h1>Berlin-wide patterns</h1>
     <p>
-      This map shows how emergency activity varies across Berlin’s Planungsräume.
-      You will be able to switch between total missions, missions per 1,000 people,
-      and the median response time for critical EMS missions.
+      How does your area compare to the rest of Berlin? Take a look at some of the data for the whole city in 2025.
     </p>
   </div>
 
-  <div class="page citywideControls">
-    <label class="switchRow">
-      <span class="switchLabel">Total missions</span>
-      <input type="checkbox" id="toggleTotMissions" checked>
-      <span class="switchSlider"></span>
-    </label>
-
-    <label class="switchRow">
-      <span class="switchLabel">Missions per 1,000 people</span>
-      <input type="checkbox" id="toggleMiss1000p">
-      <span class="switchSlider"></span>
-    </label>
-
-    <label class="switchRow">
-      <span class="switchLabel">Median response time for critical EMS missions</span>
-      <input type="checkbox" id="toggleCemsMedian">
-      <span class="switchSlider"></span>
-    </label>
+<div id="citywideLayout">
+  <div id="citywideMapWrapper">
+    <div id="citywideMap"></div>
   </div>
 
-  <div id="citywideMap"></div>
+  <aside id="citywideSidePanel">
+    <div class="citywideControls">
+      <label class="switchRow">
+        <span class="switchLabel">Total number of missions</span>
+        <input type="checkbox" id="toggleTotMissions" checked>
+        <span class="switchSlider"></span>
+      </label>
+
+      <label class="switchRow">
+        <span class="switchLabel">Missions per 1000 people</span>
+        <input type="checkbox" id="toggleMis1000p">
+        <span class="switchSlider"></span>
+      </label>
+
+      <label class="switchRow">
+        <span class="switchLabel">Median response time for critical EMS missions</span>
+        <input type="checkbox" id="toggleCemsMedian">
+        <span class="switchSlider"></span>
+      </label>
+    </div>
+
+    <div id="citywideLegend">
+      <h3 id="citywideLegendTitle">Legend</h3>
+      <div id="citywideLegendItems"></div>
+    </div>
+  </aside>
+</div>
 
 </section>
 

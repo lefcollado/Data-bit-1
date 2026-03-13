@@ -26,8 +26,11 @@ const infoTitleEl = document.getElementById("infoTitle");
 const infoContentEl = document.getElementById("infoContent");
 // citywide thematic map switches
 const toggleTotMissions = document.getElementById("toggleTotMissions");
-const toggleMiss1000p = document.getElementById("toggleMiss1000p");
+const toggleMis1000p = document.getElementById("toggleMis1000p");
 const toggleCemsMedian = document.getElementById("toggleCemsMedian");
+// citywide legend elements
+const citywideLegendTitle = document.getElementById("citywideLegendTitle");
+const citywideLegendItems = document.getElementById("citywideLegendItems");
 
 startButton.addEventListener("click", () => {
   mapScreen.scrollIntoView({ behavior: "smooth" });
@@ -687,6 +690,9 @@ function setupStatNavigation() {
 // draws all Planungsräume using the stats GeoJSON and one active metric
 function drawCitywideMap(metricField = activeCitywideMetric) {
   activeCitywideMetric = metricField;
+  
+  // update the side legend to match the active thematic layer
+  updateCitywideLegend(metricField);
 
   // remove old layer before drawing a new one
   if (citywidePlrLayer) {
@@ -716,7 +722,7 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
   }
 
   if (metricField === "mis_1000p") {
-    popupMetricLine = `Missions per 1,000 people: ${formatDecimal(props.mis_1000p)}`;
+    popupMetricLine = `Missions per 1000 people: ${formatDecimal(props.mis_1000p)}`;
   }
 
   if (metricField === "cems_med_min") {
@@ -776,6 +782,60 @@ function getCitywideFillColor(value, metricField) {
   return "#cccccc";
 }
 
+// ---------- CITYWIDE LEGEND ----------
+// updates the legend according to the selected citywide metric
+function updateCitywideLegend(metricField) {
+  if (!citywideLegendTitle || !citywideLegendItems) {
+    return;
+  }
+
+  let title = "";
+  let items = [];
+
+  if (metricField === "tot_m_25") {
+    title = "Total missions in 2025";
+    items = [
+      { color: "#f2f0f7", label: "up to 500" },
+      { color: "#dadaeb", label: "500 – 750" },
+      { color: "#bcbddc", label: "750 – 1000" },
+      { color: "#9e9ac8", label: "1000 – 1250" },
+      { color: "#6a51a3", label: "1250 or more" }
+    ];
+  }
+
+  if (metricField === "mis_1000p") {
+    title = "Missions per 1.000 people";
+    items = [
+      { color: "#eff3ff", label: "up to 102" },
+      { color: "#bdd7e7", label: "102 – 120" },
+      { color: "#6baed6", label: "120 – 138" },
+      { color: "#3182bd", label: "138 – 166" },
+      { color: "#08519c", label: "166 or more" }
+    ];
+  }
+
+  if (metricField === "cems_med_min") {
+    title = "Median response time for critical EMS missions";
+    items = [
+      { color: "#fff7bc", label: "up to 8 minutes" },
+      { color: "#fee391", label: "8 – 9 minutes" },
+      { color: "#fec44f", label: "9 – 10 minutes" },
+      { color: "#fe9929", label: "10 – 11 minutes" },
+      { color: "#ef3b2c", label: "11 – 12 minutes" },
+      { color: "#bd0026", label: "12 or more minutes" }
+    ];
+  }
+
+  citywideLegendTitle.textContent = title;
+
+  citywideLegendItems.innerHTML = items.map((item) => `
+    <div class="legendItem">
+      <span class="legendSwatch" style="background:${item.color};"></span>
+      <span class="legendLabel">${item.label}</span>
+    </div>
+  `).join("");
+}
+
 // ---------- CITYWIDE SECTION NAVIGATION ----------
 // scrolls to the Berlin-wide section and refreshes the map size
 function setupBerlinOverviewButton() {
@@ -803,14 +863,14 @@ function setupBerlinOverviewButton() {
 // ---------- CITYWIDE MAP SWITCHES ----------
 // only one thematic variable should be active at a time
 function setupCitywideSwitches() {
-  if (!toggleTotMissions || !toggleMiss1000p || !toggleCemsMedian) {
+  if (!toggleTotMissions || !toggleMis1000p || !toggleCemsMedian) {
     return;
   }
 
   // helper to activate one switch and turn the other two off
   function activateSwitch(selected) {
     toggleTotMissions.checked = selected === "tot_m_25";
-    toggleMiss1000p.checked = selected === "mis_1000p";
+    toggleMis1000p.checked = selected === "mis_1000p";
     toggleCemsMedian.checked = selected === "cems_med_min";
 
     // redraw map using the chosen variable
@@ -822,8 +882,8 @@ function setupCitywideSwitches() {
     activateSwitch("tot_m_25");
   });
 
-  // missions per 1,000 people
-  toggleMiss1000p.addEventListener("change", () => {
+  // missions per 1000 people
+  toggleMis1000p.addEventListener("change", () => {
     activateSwitch("mis_1000p");
   });
 
