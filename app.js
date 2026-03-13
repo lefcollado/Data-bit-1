@@ -32,6 +32,9 @@ const toggleCemsMedian = document.getElementById("toggleCemsMedian");
 const citywideLegendTitle = document.getElementById("citywideLegendTitle");
 const citywideLegendItems = document.getElementById("citywideLegendItems");
 const citywideLegendNote = document.getElementById("citywideLegendNote");
+// citywide navigation buttons
+const citywideNextBtn = document.getElementById("citywideNextBtn");
+const startOverBtn = document.getElementById("startOverBtn");
 
 startButton.addEventListener("click", () => {
   mapScreen.scrollIntoView({ behavior: "smooth" });
@@ -121,10 +124,14 @@ async function loadData() {
   // activate the citywide thematic map switches
   setupCitywideSwitches();
 
+  // activate citywide navigation buttons
+  setupCitywideNavigation();
+
   // ensure Leaflet recalculates map size after rendering
-setTimeout(() => {
-  citywideMap.invalidateSize();
-}, 300);
+  setTimeout(() => {
+    citywideMap.invalidateSize();
+  }, 300);
+
 }
 
 // ----------- STEP 1: SHOW ALL BZR -----------
@@ -922,6 +929,38 @@ function setupCitywideSwitches() {
   toggleCemsMedian.addEventListener("change", () => {
     activateSwitch("cems_med_min");
   });
+}
+
+// ---------- CITYWIDE NAVIGATION ----------
+// handles scrolling within and away from the citywide section
+function setupCitywideNavigation() {
+  // button below the legend scrolls to the source/footer block
+  if (citywideNextBtn) {
+    citywideNextBtn.addEventListener("click", () => {
+      const citywideFooter = document.getElementById("citywideFooter");
+
+      if (citywideFooter) {
+        citywideFooter.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    });
+  }
+
+  // restart button scrolls back to the welcome screen
+  if (startOverBtn) {
+    startOverBtn.addEventListener("click", () => {
+      const welcomeScreen = document.getElementById("welcomeScreen");
+
+      if (welcomeScreen) {
+        welcomeScreen.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    });
+  }
 }
 
 // ---------- HELPER FUNCTIONS ----------

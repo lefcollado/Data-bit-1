@@ -333,7 +333,7 @@ body {
 .nextSectionBtn {
   display: block;
   margin: 50px auto 0 auto;
-  padding: 12px 20px;
+  padding: 16px 20px;
 
   border: none;
   border-radius: 40px;
@@ -350,7 +350,9 @@ body {
 
 .nextSectionBtn:hover {
   background: #000000;
-  transform: translateY(1px);
+  color: white;
+  transform: translateY(2px);
+  animation: bounceArrow 2s infinite;
 }
 
 /* --- make layout stack on smaller screens --- */
@@ -601,4 +603,98 @@ body {
   padding: 6px 8px;
   font-size: 14px;
   line-height: 1.4;
+}
+
+/* footer block under the citywide map section */
+#citywideFooter {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+
+  margin-top: 40px;
+  padding: 32px 24px 48px 24px;
+  border-top: 1px solid #d9d9d9;
+}
+
+/* left text block */
+#citywideSource h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+#citywideSource p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #444;
+  max-width: 85ch;
+}
+
+/* right restart block */
+#citywideRestart {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.restartPrompt {
+  margin: 0 0 14px 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* restart button */
+.restartBtn {
+  padding: 12px 20px;
+  margin: 16px 0 0 0;
+  border: none;
+  border-radius: 999px;
+  background: #E6001A;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  animation: gentleBounce 1.8s infinite ease-in-out;
+}
+
+.restartBtn:hover {
+  background: #000000;
+  transform: translateY(1px);
+}
+
+@keyframes gentleBounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+  100% { transform: translateY(0); }
+}
+
+#citywideNextBtn {
+  display: block;
+  margin: 130px 24px 0 24px;
+  
+  width: 52px;
+  height: 52px;
+
+  border-radius: 50%;
+  border-width: 1px;
+  border-style: solid;
+  
+  background: none;
+  color: #000000;
+  
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#citywideNextBtn:hover {
+  background: #000000;
+  color: white;
+  transform: translateY(2px);
+  animation: bounceArrow 2s infinite;
 }
