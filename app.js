@@ -1109,3 +1109,58 @@ loadData().catch((error) => {
   statusEl.textContent =
     "Error loading files. Check filenames, paths, and GeoJSON property names.";
 });
+
+
+
+// Reveal the story blocks step by step without ghosting
+function setupWelcomeStoryReveal() {
+  const welcomeStory = document.querySelector(".welcomeStory");
+  const first = document.querySelector(".storyParagraphLeft");
+  const second = document.querySelector(".storyParagraphCenter");
+  const final = document.querySelector(".storyFinalBlock");
+
+  if (!welcomeStory || !second || !final) return;
+
+  /* Ensure the first paragraph is visible on page load */
+    first?.classList.add("storyVisible");
+
+  window.addEventListener("scroll", () => {
+    const rect = welcomeStory.getBoundingClientRect();
+    const total = welcomeStory.offsetHeight - window.innerHeight;
+    const progress = Math.min(Math.max(-rect.top / total, 0), 1);
+    const lines = document.querySelectorAll(".storyLine");
+
+
+  /* First paragraph shows first, then disappears when the middle sequence starts */
+  if (progress < 0.30) {
+    first?.classList.add("storyVisible");
+  } else {
+    first?.classList.remove("storyVisible");
+  }
+
+  /* Keep the middle block present so the lines can animate in place */
+  second.classList.add("storyVisible");
+
+  /* Only ONE middle sentence visible at a time, and none once the final block starts */
+  lines.forEach((line) => line.classList.remove("visible"));
+
+  if (progress > 0.66) {
+    /* no middle sentence should remain visible here */
+  } else if (progress > 0.54) {
+    lines[2]?.classList.add("visible");
+  } else if (progress > 0.42) {
+    lines[1]?.classList.add("visible");
+  } else if (progress > 0.30) {
+    lines[0]?.classList.add("visible");
+  }
+
+  /* Final paragraph appears after the question sequence */
+  if (progress > 0.66) {
+  final.classList.add("storyVisible");
+  } else {
+    final.classList.remove("storyVisible");
+  }
+ });
+}
+
+setupWelcomeStoryReveal();

@@ -13,7 +13,7 @@ html {
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Playfair Display', serif;
   background: #f7f7f7;
   color: #222;
 }
@@ -27,7 +27,7 @@ body {
 /* ---------------- WELCOME SCREEN: PAGE 1 + PAGE 2 ---------------- */
 #welcomeScreen {
   /* Stack two full-screen blocks vertically */
-  background: #f7f7f7;
+  background: #ffffff;
 }
 
 /* Default wrapper for welcome pages */
@@ -38,9 +38,9 @@ body {
 
 /* Second page keeps the readable text width */
 .welcomeStory.page {
-  max-width: 1100px;
+  max-width: none;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 24px;
 }
 
 /* First page breaks out to full browser width */
@@ -144,25 +144,197 @@ body {
   border-radius: 4px;
 }
 
-/* Second page: story text + button */
+/* Second page uses a sticky stage with a long scroll area */
+/* Full-width scrollytelling section */
 .welcomeStory {
-  min-height: 100vh; /* creates the next full-screen section */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  /* Tall section creates the scroll distance for the cumulative reveal */
+  min-height: 300vh;
+  position: relative;
+}
+
+/* This keeps the text composition fixed on screen while the user scrolls */
+.storyStickyFrame {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+
+  /* Small side padding, but much wider than before */
+  padding: 0 64px;
+  box-sizing: border-box;
+}
+
+/* Holds all paragraphs in one shared composition */
+.storySequence {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  text-align: left;
+  gap: 72px;
 }
 
-.welcomeStory p {
+/* Shared paragraph styling */
+.storyParagraph {
   font-size: 18px;
   line-height: 1.7;
-  max-width: 760px;
-  margin: 0 0 20px 0;
+  margin: 0;
+
+  /* Hidden by default; specific blocks below decide when to reveal */
+  opacity: 0;
+  transform: translateY(30px);
 }
 
-#welcomeScreen #startButton {
-  margin-top: 24px;
-  align-self: flex-start; /* keeps button aligned with the text column */
+/* First paragraph: left aligned and appears first */
+/* First paragraph: fully visible from the start and pushed left */
+.storyParagraphLeft {
+  align-self: flex-start;
+  text-align: left;
+  max-width: 920px;
+
+  /* Start visible, but allow JS to hide it later */
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* First paragraph becomes a row: text on the left, icon on the right */
+.storyParagraphWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* space between paragraph and gif */
+  flex-direction: row-reverse; /* flips order: icon → text */
+}
+
+/* Keep the first paragraph text width readable */
+.storyParagraphText {
+  max-width: 800px;
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.7;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+}
+
+/* Animated icon sizing */
+.storyAlertIcon {
+  width: 80px;   /* adjust if you want it bigger or smaller */
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0; /* prevents the gif from shrinking */
+  padding-right: 4%;
+}
+
+
+/* Second paragraph: centered, hidden until later */
+.storyParagraphCenter {
+  align-self: center;
+  text-align: center;
+  max-width: 1200px;
+  opacity: 1;
+  transform: none;
+}
+
+/* This targets the actual text element inside the middle paragraph */
+.storyParagraphCenter .storyParagraphText {
+  font-size: 30px;
+}
+
+/* Stack the three sentences vertically */
+.storyQuestions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each sentence starts hidden */
+.storyLine {
+  display: block;
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+/* When visible */
+.storyLine.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Third paragraph: pushed right, hidden until later */
+.storyParagraphRight {
+  align-self: flex-end;
+  font-size: 22px;
+  text-align: right;
+  max-width: 550px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+}
+
+/* Final block: button centered, text to the right */
+.storyFinalBlock {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Start button appears together with the final block */
+.storyFinalBlock #startButton {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* true center of screen */
+}
+
+/* Text to the right of the button */
+.storyFinalBlock .storyParagraphRight {
+  position: absolute;
+  left: calc(50% + 200px); /* push text to the right of button */
+  top: 50%;
+  transform: translateY(-50%);
+
+  text-align: left;
+  max-width: 550px;
+}
+
+/* class added by JavaScript when each block should appear */
+.storyVisible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* When JS removes visibility from the first paragraph, hide it cleanly */
+.storyParagraphLeft:not(.storyVisible) {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* When the final block becomes visible, also reveal its paragraph */
+.storyFinalBlock.storyVisible .storyParagraphRight {
+  opacity: 1;
+  transform: translateY(-15%);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Fade + rise reveal */
+@keyframes storyReveal {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive: stack into one column on smaller screens */
@@ -223,8 +395,8 @@ body {
 
 #startButton {
   margin-top: 40px;
-  font-size: 24px;
-  padding: 12px 22px;
+  font-size: 28px;
+  padding: 16px 28px;
   border-radius: 40px;
   border: none;
   background: #E6001A;
