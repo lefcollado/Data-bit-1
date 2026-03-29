@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:wght@400;500;600&display=swap');
+
 html {
   scroll-behavior: smooth;
 }
@@ -22,20 +24,161 @@ body {
   padding: 0;
 }
 
-.heroHeader {
+/* ---------------- WELCOME SCREEN: PAGE 1 + PAGE 2 ---------------- */
+#welcomeScreen {
+  /* Stack two full-screen blocks vertically */
+  background: #f7f7f7;
+}
+
+/* Default wrapper for welcome pages */
+#welcomeScreen .page {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Second page keeps the readable text width */
+.welcomeStory.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* First page breaks out to full browser width */
+.welcomeIntro.page {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: grid;
+  /* Left = 2/5, Right = 3/5 */
+  grid-template-columns: 2fr 3fr;
+}
+
+/* Make the first screen full-width (no margins/padding constraints) */
+.welcomeIntro {
+  max-width: none;      /* override .page limit */
+  width: 100%;
+  margin: 0;            /* remove centering margins */
+  padding: 0;           /* remove side padding */
+
+  min-height: 100vh;
+  display: grid;
+  /* Left = 2/5, Right = 3/5 */
+  grid-template-columns: 2fr 3fr;
+}
+
+/* Left column text */
+
+/* NEW: controls vertical alignment of the whole left column */
+.welcomeIntroText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centers title block vertically */
+  padding: 0 80px; /* controls left/right spacing of text */
+}
+
+.welcomeIntroText h1 {
+  font-size: 120px;
+  margin: 0 0 20px 0;
+  line-height: 1;
+  font-family: 'Playfair Display', serif;
+  color: #000000;
+}
+
+.welcomeIntroText h2 {
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+  color: #000000;
+  margin: 0 0 40px 0;
+}
+
+.welcomeIntroText .authors {
+  font-size: 18px;
+  font-weight: 400;
+  
+  font-family: 'Playfair Display', serif;
+  color: #656565;
+  margin: 0;
+}
+
+/* Date below authors, even lighter */
+.welcomeIntroText .date {
+  display: block;
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #5f5f5f; /* lighter than authors */
+}
+
+/* Right column now becomes a full-height image */
+.welcomeIntroPhoto {
+  height: 100vh;
   position: relative;
-  z-index: 1;
-  height: 100%;
+
+  /* THIS ensures it fully fills its grid column */
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Image fills the entire right column */
+.welcomePhotoCard {
+  width: 100%;
+  height: 100%; /* fill full column height */
+  background-image: url("image/berlinerfeuerwehr112.jpg");
+  background-size: cover;
+  background-position: center;
+  border-radius: 0; /* remove card look */
+}
+
+/* Photographer name on top of the image */
+.photoCredit {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  font-size: 13px;
+  font-weight: 600; /* makes it bold */
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Second page: story text + button */
+.welcomeStory {
+  min-height: 100vh; /* creates the next full-screen section */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center; 
+  text-align: left;
 }
 
-.heroContent {
-  max-width: 1100px;
-  margin: 0 auto;
-  text-align: center;
+.welcomeStory p {
+  font-size: 18px;
+  line-height: 1.7;
+  max-width: 760px;
+  margin: 0 0 20px 0;
+}
+
+#welcomeScreen #startButton {
+  margin-top: 24px;
+  align-self: flex-start; /* keeps button aligned with the text column */
+}
+
+/* Responsive: stack into one column on smaller screens */
+@media (max-width: 900px) {
+  .welcomeIntro {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .welcomeIntroText h1 {
+    font-size: 52px;
+  }
+
+  .welcomePhotoCard {
+    aspect-ratio: 16 / 10;
+  }
 }
 
 /* make map page wrappers full-width */
@@ -77,73 +220,6 @@ body {
 .hidden {
   display: none;
 }
-.welcomeHero {
-  position: relative;
-  height: 300px;
-
-  background-image: url("image/berlinerfeuerwehr112.jpg");
-  background-size: cover;
-  background-position: center;
-}
-
-.welcomeHero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  background: rgba(0, 0, 0, 0.7);
-}
-
-#welcomeScreen {
-  min-height: 100vh;
-}
-
-#welcomeScreen .page {
-  max-width: 900px;
-  width: 100%;
-  padding: 0 20px;
-  text-align: center;
-}
-
-#welcomeScreen > * {
-  position: relative;
-  z-index: 1;
-}
-
-.welcomeContent {
-  min-height: calc(100vh - 300px); /* 300px = hero height */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.heroHeader h1 {
-  font-size: 70px;
-  margin-bottom: 30px;
-  background: none;
-  color: #ffffff;
-}
-
-.heroHeader h2 {
-  font-size: 22px;
-  font-weight: 500;
-  color: #ffffff;
-  margin-top: -10px;
-  margin-bottom: 20px;
-}
-
-.heroHeader p {
-  font-size: 16px;
-  font-weight: 500;
-  color: #ffffff;
-  margin-top: 0px;
-  margin-bottom: 60px;
-}
-
-.welcomeContent p {
-  font-size: 18px;
-  line-height: 1.6;
-}
 
 #startButton {
   margin-top: 40px;
@@ -168,7 +244,6 @@ body {
   max-width: none;
   width: 100%;
 }
-
 #map,
 #resultMap {
   width: 100%;
@@ -746,16 +821,4 @@ body {
   background: #000000;
   display: inline-block;
   flex: 0 0 12px;
-}
-
-.photoCredit {
-  position: absolute;
-  bottom: 10px;
-  right: 14px;
-
-  font-size: 12px;
-  color: white;
-  opacity: 0.85;
-
-  z-index: 2;
 }

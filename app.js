@@ -60,6 +60,7 @@ function showScreen(screenId) {
   }
 }
 
+// Start the experience from the second welcome page and open the map screen
 // when the START button is clicked, show the map section
 startButton.addEventListener("click", () => {
   showScreen("mapScreen");

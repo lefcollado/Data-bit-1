@@ -17,36 +17,45 @@
 <body>
 
   <section id="welcomeScreen">
-
-    <div class="welcomeHero">
-      <div class="heroHeader">
-        <h1>Follow the Sirens</h1>
-        <h2>
-          Keeping track of the Berliner Feuerwehr activity near you
-        </h2>
-        <p class="authors">
-          By Letícia Figueiredo Collado and Xiaohan Wu
-        </p>
-      </div>
-
-      <div class="photoCredit">Photo: Florian Schmidt</div>
-      
+  <!-- First screen: split into two columns -->
+  <div class="welcomeIntro page">
+    <!-- Left column: title, subtitle, authors -->
+    <div class="welcomeIntroText">
+      <h1>Follow the sirens</h1>
+      <h2>
+        KEEPING TRACK OF THE BERLINER FEUERWEHR ACTIVITY NEAR YOU
+      </h2>
+      <p class="authors">
+        By Letícia Figueiredo Collado and Xiaohan Wu<br>
+        <span class="date">Berlin, March 29, 2026</span>
+      </p>
     </div>
 
-    <div class="welcomeContent">
-      <div class="page">
-        <p>
-          Emergency vehicles in Germany are known for their brain-breaking sirens. Their loud and piercing sounds decidely make room for the necessary service to get through - it's impossible not to notice them.
-        </p>
-        <p>
-          Did you ever wonder where the fire trucks are going? Where in Berlin are all these fires? Are they really all fires?
-        </p>
-        <p>
-          Follow us in this interactive path to understand some of the fire brigade activity in Berlin near your home, work, school or any other place of interest.
-        </p>
-        <button id="startButton">↓ Start</button>
-      </div>
+    <!-- Right column: photo credit block -->
+    <div class="welcomeIntroPhoto">
+      <!-- Decorative image block; the actual image is set in CSS -->
+      <div class="welcomePhotoCard" aria-label="Photo by Florian Schmidt"></div>
+      <p class="photoCredit">Photo: Florian Schmidt</p>
     </div>
+  </div>
+
+  <!-- Second screen inside the welcome flow -->
+  <div class="welcomeStory page">
+    <!-- This is the text users scroll to after the first page -->
+    <p>
+      Emergency vehicles in Germany are known for their brain-breaking sirens. Their loud and piercing sounds decidely make room for the necessary service to get through - it's impossible not to notice them.
+    </p>
+    <p>
+      Did you ever wonder where the fire trucks are going? Where in Berlin are all these fires? Are they really all fires?
+    </p>
+    <p>
+      Follow us in this interactive path to understand some of the fire brigade activity in Berlin near your home, work, school or any other place of interest.
+    </p>
+
+    <!-- Start button remains at the bottom of the second page -->
+    <button id="startButton">↓ Start</button>
+  </div>
+</section>
 
   </section>
 
