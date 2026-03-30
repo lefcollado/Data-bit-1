@@ -24,10 +24,12 @@ This page was developed in collaboration with [Prof. Dr. Florian Koch](https://w
 
 <br><br>
 
-Statement of contributions:  
+<p align="left">
+  <strong>Statement of contributions:</strong>
+</p>
 
-The work on this project was divided into two main areas: frontend/interface development and data-driven map functionality. Letícia focused on the user interface and overall experience, including structuring the different screens (welcome, selection, results, and citywide view), designing the layout, and implementing all styling in CSS. This also included refining visual consistency, aligning elements, and adding interactive features such as smooth scrolling, hover effects, and button animations.  
+Letícia focused on the user interface and overall experience, including structuring the different screens (welcome, selection, results, and citywide view), designing the layout, and implementing all styling in CSS. This also included building the interactive maps with Leaflet, refining visual consistency, aligning elements, and adding interactive features such as smooth scrolling, hover effects, and button animations.
 
-Xiaohan focused on the technical implementation of the maps and data, which involved integrating and managing the GeoJSON datasets, building the interactive maps with Leaflet, and implementing the logic for selecting regions and updating the content dynamically. They were responsible for calculating and displaying statistics, handling conditional text (such as singular vs. plural forms), and creating the thematic citywide map with different indicators and legends.  
+Xiaohan focused on the technical implementation of the maps and data, which involved integrating and managing the GeoJSON datasets, implementing the logic for selecting regions and updating the content dynamically. She was responsible for calculating and displaying statistics, handling conditional text, and creating the thematic citywide map with different indicators and legends.  
 
-We worked together on testing, debugging, and refining the interaction between design and functionality to ensure a smooth and coherent user experience.
+We worked together on testing, debugging, and refining the interaction between design and functionality.
