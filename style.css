@@ -432,10 +432,12 @@ body {
   background: #E6001A;
   color: white;
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 #startButton:hover {
   background: #000000;
+  animation: bounceStartButton 2s infinite;
 }
 
 #mapScreen,
@@ -663,6 +665,11 @@ body {
   50% { transform: translateY(6px); }
 }
 
+@keyframes bounceStartButton {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -65%); }
+}
+
 /* button leading from the local story to the Berlin-wide map */
 .nextSectionBtn {
   display: block;
@@ -729,7 +736,7 @@ body {
 #resetBtn:hover {
   background: #000000;
   color: white;
-  transform: translateY(-1px);
+  animation: bounceArrow 2s infinite;
 }
 
 #resultIntroRow {
@@ -765,7 +772,7 @@ body {
 #resultResetBtn:hover {
   background: #000000;
   color: white;
-  transform: translateY(-1px);
+  animation: bounceArrow 2s infinite;
 }
 
 /* sticky white header for the stats panel */
