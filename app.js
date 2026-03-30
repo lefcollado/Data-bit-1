@@ -3,10 +3,8 @@ const PLANUNGSRAUM_BZR_ID_FIELD = "BZR_ID";
 const BZR_NAME_FIELD = "BZR_Name";
 const PLANUNGSRAUM_ID_FIELD = "PLR_ID";
 const PLANUNGSRAUM_NAME_FIELD = "PLR_Name";
-
 const FIRESTATION_BZR_ID_FIELD = "BZR_ID";
 const FIRESTATION_NAME_FIELD = "wach_name";
-
 const STAT_TOTAL_MISSIONS = "tot_m_25";
 const STAT_CEMS_PERCENT = "cems_perc";
 const STAT_FIRE_PERCENT = "fire_perc";
@@ -21,6 +19,7 @@ const startButton = document.getElementById("startButton");
 const statusEl = document.getElementById("status");
 const resultStatusEl = document.getElementById("resultStatus");
 const resetBtn = document.getElementById("resetBtn");
+const resultResetBtn = document.getElementById("resultResetBtn");
 // references to elements in the right-side info panel
 const infoTitleEl = document.getElementById("infoTitle");
 const infoContentEl = document.getElementById("infoContent");
@@ -183,6 +182,9 @@ function drawBezirksregionen() {
   "Where your kids go to school? Anything is possible.<br>" +
   "<strong>Click on your Bezirksregion:</strong>";
   resetBtn.hidden = true;
+  if (resultResetBtn) {
+    resultResetBtn.hidden = true;
+  }
 
   if (bezirksregionenLayer) {
     mainMap.removeLayer(bezirksregionenLayer);
@@ -335,6 +337,9 @@ layer.on("mouseout", function () {
 
   statusEl.textContent = `Now select your Planungsraum inside ${selectedBzrName}.`;
   resetBtn.hidden = false;
+  if (resultResetBtn) {
+    resultResetBtn.hidden = false;
+  }
 }
 
 // ----------- STEP 3: SHOW RESULT MAP -----------
@@ -419,8 +424,11 @@ function showResultMap(planungsraumFeature, selectedBzrFeature) {
 
   // show the results section before scrolling to it
   showScreen("resultScreen");
+  if (resultResetBtn) {
+  resultResetBtn.hidden = false;
+  }
 
-  resultScreen.scrollIntoView({ behavior: "smooth" });
+  resultScreen.scrollIntoView({ behavior: "smooth", block: "start" });
 
   setTimeout(() => {
     resultMap.invalidateSize();
@@ -469,19 +477,24 @@ function showFireStationsOnResultMap(selectedBzrFeature) {
 
   // draw fire stations as circle markers
   resultFirestationsLayer = L.geoJSON(filteredFirestations, {
-    pointToLayer: (feature, latlng) => {
-      return L.circleMarker(latlng, {
-        radius: 6,
-        color: "#000000ff",
-        weight: 2,
-        fillColor: "#000000ff",
-        fillOpacity: 0.9
-      });
-    },
-    onEachFeature: (feature, layer) => {
-      const name = feature.properties?.[FIRESTATION_NAME_FIELD] || "Fire station";
-      layer.bindPopup(`<strong>${name}</strong>`);
-    }
+  pointToLayer: (feature, latlng) => {
+    return L.circleMarker(latlng, {
+      radius: 6,
+      color: "#000000ff",
+      weight: 2,
+      fillColor: "#000000ff",
+      fillOpacity: 0.9
+    });
+  },
+  onEachFeature: (feature, layer) => {
+    const name = feature.properties?.[FIRESTATION_NAME_FIELD] || "Fire station";
+
+    layer.bindTooltip(`<strong>${name}</strong>`, {
+      sticky: true,
+      direction: "top",
+      opacity: 0.95
+    });
+  }
   }).addTo(resultMap);
 
   // return the number of visible stations so we can use it in the final stat block
@@ -664,32 +677,43 @@ function setupStationReveal() {
     const stationCountValueEl = document.getElementById("stationCountValue");
     const stationCountSentenceEl = document.getElementById("stationCountSentence");
     const stationSectionEl = document.getElementById("stat-stations");
+    const stationCountLeadEl = document.getElementById("stationCountLead");
 
     if (stationCountValueEl) {
       stationCountValueEl.textContent = formatInteger(stationCount);
     }
 
+    const isSingular = stationCount === 1;
+
+    if (stationCountLeadEl) {
+      stationCountLeadEl.textContent = `In and around the Bezirksregion of ${selectedBzrFeature.properties[BZR_NAME_FIELD]}, there ${isSingular ? "is" : "are"}`;
+    }
+
     if (stationCountSentenceEl) {
-  stationCountSentenceEl.innerHTML = `
-    working
-    <span class="tooltipTerm">
-      fire stations
-      <span class="tooltipBox">
-        There are three types of fire stations:<br>
-        <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
-        <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr)<br>
-        <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)<br><br>
-        Click on the fire stations in the map to see which type are the ones close to you.
-      </span>
-    </span>.
-  `;
-}
+      stationCountSentenceEl.innerHTML = `
+        working
+        <span class="tooltipTerm">
+          ${isSingular ? "fire station" : "fire stations"}
+          <span class="tooltipBox">
+            There are three types of fire stations:<br>
+            <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
+            <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr)<br>
+            <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)<br><br>
+            Click on the fire stations in the map to see which type are the ones close to you.
+          </span>
+        </span>.
+      `;
+    }
 
     // scroll the page down to the final block
     if (stationSectionEl) {
-      stationSectionEl.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+      const headerOffset = 140;
+      const targetTop =
+        stationSectionEl.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: targetTop,
+        behavior: "smooth"
       });
     }
   });
@@ -703,31 +727,28 @@ const citywideMap = L.map("citywideMap", {
   zoomDelta: 0.5
 });
 
-
 // ---------- ARROW NAVIGATION ----------
 // makes the arrow buttons scroll to the next stat block
 function setupStatNavigation() {
-
   const buttons = document.querySelectorAll(".nextStatBtn");
 
   buttons.forEach((button) => {
-
     button.addEventListener("click", () => {
-
       const targetId = button.dataset.target;
       const targetEl = document.getElementById(targetId);
 
       if (targetEl) {
-        targetEl.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
+        const headerOffset = 140;
+        const targetTop =
+          targetEl.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+        window.scrollTo({
+          top: targetTop,
+          behavior: "smooth"
         });
       }
-
     });
-
   });
-
 }
 
 
@@ -812,12 +833,7 @@ function drawCitywideMap(metricField = activeCitywideMetric) {
 
   }).addTo(citywideMap);
 
-  // keep fire stations above the polygons if this layer is active
-  if (metricField === "cems_med_min" && citywideFirestationsLayer) {
-    citywideFirestationsLayer.bringToFront();
-  }
-
-  // zoom map to all Planungsräume
+   // zoom map to all Planungsräume
   citywideMap.fitBounds(citywidePlrLayer.getBounds(), {
     padding: [20, 20]});
 }
@@ -833,6 +849,7 @@ function drawCitywideFirestations() {
   citywideFirestationsLayer = L.geoJSON(allFirestations, {
     pointToLayer: (feature, latlng) => {
       return L.circleMarker(latlng, {
+        pane: "markerPane",
         radius: 4,
         color: "#000000",
         weight: 1,
@@ -844,14 +861,14 @@ function drawCitywideFirestations() {
     onEachFeature: (feature, layer) => {
       const name = feature.properties?.[FIRESTATION_NAME_FIELD] || "Fire station";
 
-      layer.bindTooltip(
-        `<strong>${name}</strong>`,
-        {
-          sticky: true,
-          direction: "top",
-          opacity: 0.95
-        }
-      );
+    layer.bindTooltip(
+      `<strong>${name}</strong>`,
+      {
+        sticky: true,
+        direction: "top",
+        opacity: 0.95
+      }
+    );
     }
   }).addTo(citywideMap);
 }
@@ -985,10 +1002,10 @@ function setupBerlinOverviewButton() {
   }
 
   berlinOverviewBtn.addEventListener("click", () => {
-    // make the citywide screen visible first
-    showScreen("citywideMapScreen");
+    // keep the result screen visible and simply reveal the citywide section below it
+    citywideMapScreen.style.display = "block";
 
-    // then scroll to it
+    // then scroll down to the Berlin-wide section
     citywideMapScreen.scrollIntoView({
       behavior: "smooth",
       block: "start"
@@ -997,8 +1014,6 @@ function setupBerlinOverviewButton() {
     // once the section is visible, resize Leaflet and draw the active layer
     setTimeout(() => {
       citywideMap.invalidateSize();
-
-      // draw the map only after the section is visible
       drawCitywideMap(activeCitywideMetric);
     }, 300);
   });
@@ -1056,10 +1071,23 @@ function setupCitywideNavigation() {
 
   // restart button reloads the page and returns to a clean welcome screen
     if (startOverBtn) {
-      startOverBtn.addEventListener("click", () => {
-        window.location.reload();
-     });
+  startOverBtn.addEventListener("click", () => {
+    // go back to welcome screen
+    showScreen("welcomeScreen");
+
+    // scroll to very top
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+    // hide citywide section again (so it's clean next time)
+    const citywideMapScreen = document.getElementById("citywideMapScreen");
+    if (citywideMapScreen) {
+      citywideMapScreen.style.display = "none";
     }
+  });
+}
 }
 
 // ---------- HELPER FUNCTIONS ----------
@@ -1102,6 +1130,23 @@ resetBtn.addEventListener("click", () => {
     }
   }, 500);
 });
+
+if (resultResetBtn) {
+  resultResetBtn.addEventListener("click", () => {
+    drawBezirksregionen();
+    showScreen("mapScreen");
+
+    setTimeout(() => {
+      mainMap.invalidateSize();
+
+      if (bezirksregionenLayer) {
+        mainMap.fitBounds(bezirksregionenLayer.getBounds(), {
+          padding: [20, 20]
+        });
+      }
+    }, 500);
+  });
+}
 
 // ----------- START -----------
 loadData().catch((error) => {

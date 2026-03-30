@@ -9,6 +9,7 @@ html {
 #resultScreen,
 #citywideMapScreen {
   display: none;
+  scroll-margin-top: 32px;
 }
 
 body {
@@ -374,23 +375,52 @@ body {
 #mapScreen h1{
   margin-bottom: 10px;
   margin-left: 24px;
+  font-size: 44px;
 }
 #mapScreen p{
   margin-top: 0;
   margin-left: 24px;
+  font-size: 20px;
 }
-#mapScreen button,
+
 #resultScreen h1{
   margin-bottom: 10px;
   margin-left: 24px;
+  font-size: 44px;
 }
+
 #resultScreen p {
   padding-left: 24px;
   padding-right: 24px;
+  font-size: 20px;
 }
 
 .hidden {
   display: none;
+}
+
+#resultIntro {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: white;
+  padding: 20px 0 12px 0;
+}
+
+#resultIntro h1 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  margin-left: 24px;
+  font-size: 44px;
+}
+
+#resultIntro #resultStatus {
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding-left: 0;
+  padding-right: 24px;
+  font-size: 20px;
+  line-height: 1.6;
 }
 
 #startButton {
@@ -410,20 +440,40 @@ body {
 
 #mapScreen,
 #resultScreen {
-  min-height: 100vh;
-  padding: 20px 0;
   background: white;
   max-width: none;
   width: 100%;
+  padding: 20px 0 32px 0;
 }
+
+#mapScreen {
+  min-height: auto;
+}
+
+#resultScreen {
+  min-height: 100vh;
+}
+
 #map,
 #resultMap {
   width: 100%;
-  height: calc(100vh - 140px);
   border-radius: 8px;
   overflow: hidden;
   background: #eef2f3;
   border: 1px solid #ccc;
+}
+
+/* First map (selection)*/
+#map {
+  height: 70vh;
+  min-height: 560px;
+  max-height: 820px;
+}
+
+/* Result map*/
+#resultMap {
+  height: 80vh;
+  min-height: 550px;
 }
 
 #status{
@@ -433,10 +483,8 @@ body {
 }
 
 #resultStatus {
-  margin-top: 0;
-  margin-bottom: 12px;
-  line-height: 1.6;
-  
+  margin: 0;
+  line-height: 1.6;  
 }
 
 #resetBtn {
@@ -460,14 +508,13 @@ body {
 #resultMapWrapper {
   width: 100%;
   position: sticky;
-  top: 20px;
+  top: 150px;
   align-self: start;
 }
 
 #infoPanel {
   background: #ffffff;
-  
-  padding: 20px;
+  padding: 20px 20px 0 20px;
   min-height: 700px;
   box-sizing: border-box;
 }
@@ -524,17 +571,18 @@ body {
 }
 
 .statSection {
-  min-height: 80vh; /* each stat takes most of the screen height */
+  min-height: calc(100vh - 170px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 20px 0;
+  padding: 0 0 20px 0;
+  box-sizing: border-box;
+  scroll-margin-top: 140px;
 }
 
-/* prevent the first stat block from being vertically centered */
 .statSection:first-of-type {
-  justify-content: flex-start;
-  padding-top: 30px;
+  justify-content: center;
+  padding-top: 0;
 }
 
 /* smaller note text shown below the main sentence and above the arrow */
@@ -684,10 +732,46 @@ body {
   transform: translateY(-1px);
 }
 
+#resultIntroRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+#resultResetBtn {
+  margin-left: 0;
+  margin-top: 5px;
+  margin-bottom: 19px;
+  white-space: nowrap;
+
+  padding: 9px 16px;
+
+  border-radius: 40px;
+  border: 1.5px solid #000000;
+
+  background: white;
+  color: #000000;
+
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: all 0.15s ease;
+}
+
+#resultResetBtn:hover {
+  background: #000000;
+  color: white;
+  transform: translateY(-1px);
+}
+
 /* sticky white header for the stats panel */
 #infoHeader {
   position: sticky;
-  top: 20px;
+  top: 150px;
   z-index: 20;
 
   background: white;
@@ -906,14 +990,15 @@ body {
 #citywideSource h3 {
   margin-top: 0;
   margin-bottom: 12px;
-  font-size: 20px;
+  font-size: 22px;
+  color: #000000;
 }
 
 #citywideSource p {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.6;
-  color: #444;
+  color: #000000;
   max-width: 85ch;
 }
 
@@ -927,7 +1012,7 @@ body {
 
 .restartPrompt {
   margin: 0 0 14px 0;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 600;
 }
 
