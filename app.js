@@ -322,14 +322,20 @@ layer.on("mouseout", function () {
   });
 });
 
-      layer.on("click", function () {
-        console.log("Clicked Planungsraum:", feature.properties);
-        selectedPlanungsraumFeature = feature;
-        // draw the result map
-        showResultMap(feature, clickedBzrFeature);
-        // update the right-side statistics panel
-        updateInfoPanel(feature);
-      });
+layer.on("click", function () {
+  console.log("Clicked Planungsraum:", feature.properties);
+  selectedPlanungsraumFeature = feature;
+
+  // draw the result map
+  showResultMap(feature, clickedBzrFeature);
+
+  // draw fire stations immediately and get their count
+  const stationCount = showFireStationsOnResultMap(clickedBzrFeature);
+
+  // build the right-side statistics panel with the count already available
+  updateInfoPanel(feature, clickedBzrFeature, stationCount);
+});    
+
     }
   }).addTo(mainMap);
 
@@ -511,7 +517,7 @@ function findStatsForPLR(plrId) {
 
 // ---------- INFO PANEL ----------
 // Updates the right-side panel with statistics for the selected Planungsraum
-function updateInfoPanel(planungsraumFeature) {
+function updateInfoPanel(planungsraumFeature, selectedBzrFeature, stationCount) {
   const plrId = planungsraumFeature.properties[PLANUNGSRAUM_ID_FIELD];
   const plrName = planungsraumFeature.properties[PLANUNGSRAUM_NAME_FIELD];
 
@@ -595,35 +601,34 @@ infoContentEl.innerHTML = `
 
     <p class="statNote">The city had a total of 136,2 missions per 1000 people.</p>
 
-    <button class="nextStatBtn revealStationsBtn">↓</button>
+    <button class="nextStatBtn" data-target="stat-stations">↓</button>
   </section>
 
-  <section class="statSection" id="stat-stations">
-    <p class="statLead" id="stationCountLead">
-      In and around the Bezirksregion of ${selectedBzrFeature.properties[BZR_NAME_FIELD]}, there are
-    </p>
+<section class="statSection" id="stat-stations">
+  <p class="statLead" id="stationCountLead">
+    In and around the Bezirksregion of ${selectedBzrFeature.properties[BZR_NAME_FIELD]}, there ${stationCount === 1 ? "is" : "are"}
+  </p>
 
-    <div class="statBigNumber" id="stationCountValue">–</div>
+  <div class="statBigNumber" id="stationCountValue">${formatInteger(stationCount)}</div>
 
-    <p class="statTrail" id="stationCountSentence">
-      working
+  <p class="statTrail" id="stationCountSentence">
+    working
     <span class="tooltipTerm">
-          fire stations
-          <span class="tooltipBox">
-            There are three types of fire stations:<br>
-            <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
-            <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr) <br>
-            <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)
-            <br><br>
-          </span>
-        </span>.
-    </p>
+      ${stationCount === 1 ? "fire station" : "fire stations"}
+      <span class="tooltipBox">
+        There are three types of fire stations:<br>
+        <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
+        <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr)<br>
+        <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)<br><br>
+        Hover over the fire stations on the map to see which ones are close to you.
+      </span>
+    </span>.
+  </p>
 
-    <p class="statNote">As of 2025, there are 102 fire stations distributed through the city of Berlin.</p>
+  <p class="statNote">As of 2025, there are 102 fire stations distributed through the city of Berlin.</p>
 
-    <button class="nextStatBtn" data-target="stat-cems-median">↓</button>
-
-  </section>
+  <button class="nextStatBtn" data-target="stat-cems-median">↓</button>
+</section>
 
 <section class="statSection" id="stat-cems-median">
   <p class="statLead">
@@ -651,8 +656,6 @@ infoContentEl.innerHTML = `
 
 `;
 
-// activate the final reveal button after the panel HTML has been inserted
-setupStationReveal();
 // activate arrow navigation after panel content is created
 setupStatNavigation();
 // activate the button leading to the Berlin-wide section
@@ -660,64 +663,6 @@ setupBerlinOverviewButton();
 
 }
 
-// ---------- FINAL REVEAL STEP ----------
-// When the user clicks the last arrow, add fire stations to the map and fill the final block
-function setupStationReveal() {
-  const revealButton = document.querySelector(".revealStationsBtn");
-
-  if (!revealButton) {
-    return;
-  }
-
-  revealButton.addEventListener("click", () => {
-    // add fire stations to the left map and get how many are shown
-    const stationCount = showFireStationsOnResultMap(selectedBzrFeature);
-
-    // fill the final stat block with the number of visible stations
-    const stationCountValueEl = document.getElementById("stationCountValue");
-    const stationCountSentenceEl = document.getElementById("stationCountSentence");
-    const stationSectionEl = document.getElementById("stat-stations");
-    const stationCountLeadEl = document.getElementById("stationCountLead");
-
-    if (stationCountValueEl) {
-      stationCountValueEl.textContent = formatInteger(stationCount);
-    }
-
-    const isSingular = stationCount === 1;
-
-    if (stationCountLeadEl) {
-      stationCountLeadEl.textContent = `In and around the Bezirksregion of ${selectedBzrFeature.properties[BZR_NAME_FIELD]}, there ${isSingular ? "is" : "are"}`;
-    }
-
-    if (stationCountSentenceEl) {
-      stationCountSentenceEl.innerHTML = `
-        working
-        <span class="tooltipTerm">
-          ${isSingular ? "fire station" : "fire stations"}
-          <span class="tooltipBox">
-            There are three types of fire stations:<br>
-            <b>BF:</b> professional fire brigade (Berufsfeuerwehr)<br>
-            <b>FF:</b> volunteer fire brigade (Freiwillige Feuerwehr)<br>
-            <b>RW or RTW:</b> ambulance/rescue station (Rettungswache)<br><br>
-            Click on the fire stations in the map to see which type are the ones close to you.
-          </span>
-        </span>.
-      `;
-    }
-
-    // scroll the page down to the final block
-    if (stationSectionEl) {
-      const headerOffset = 140;
-      const targetTop =
-        stationSectionEl.getBoundingClientRect().top + window.scrollY - headerOffset;
-
-      window.scrollTo({
-        top: targetTop,
-        behavior: "smooth"
-      });
-    }
-  });
-}
 
 // ---------- CITYWIDE THEMATIC MAP ----------
 // full-width map for Berlin-wide PLR patterns
